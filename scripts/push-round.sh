@@ -41,6 +41,12 @@ if command -v bd >/dev/null 2>&1; then
   bd sync --flush-only >/dev/null 2>&1 || true
 fi
 
+# 1b. Archive durable teacher knowledge from recent runs into
+#     state/knowledge/ so it seeds the next round's students.
+if [[ -x "$HERE/scripts/archive-knowledge.sh" ]]; then
+  bash "$HERE/scripts/archive-knowledge.sh" >/dev/null 2>&1 || true
+fi
+
 # 2. If a selection memo exists, copy it into docs/memos/<stamp>.md so it
 #    survives even though runs/ is gitignored.
 mkdir -p docs/memos

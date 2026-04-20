@@ -35,6 +35,33 @@ from .tools import build_toolset
 from .tools.challenge_tools import ChallengeFinalized
 from .tools.scorecard_writer import ScorecardFinalized
 
+
+def _facts_injection(ctx) -> str:
+    """Inject teacher-curated facts into the system prompt.
+
+    Pulls `scope='global'` facts and repo-scoped facts for the current
+    evaluation. The channel's facts_store is mtime-gated (reload_if_changed)
+    so this is cheap on the hot path but picks up a fact the teacher saves
+    mid-run for the next turn.
+    """
+    if ctx.channel is None or ctx.channel.facts_store is None:
+        return ""
+    try:
+        ctx.channel.facts_store.reload_if_changed()
+    except Exception:  # noqa: BLE001
+        pass
+    # facts_store.match returns globals + the scoped matches, so a single
+    # call covers both. Calling twice double-counts global facts.
+    all_facts = list(ctx.channel.facts_store.match(
+        scope="repo", target=ctx.config.repo_url,
+    ))
+    if not all_facts:
+        return ""
+    lines = ["", "# Teacher-curated facts (authoritative; take these as ground truth):"]
+    for f in all_facts[:20]:  # cap to keep the system prompt bounded
+        lines.append(f"- [{f.scope}:{f.target or '*'}] {f.content}")
+    return "\n".join(lines) + "\n"
+
 log = logging.getLogger(__name__)
 
 
@@ -95,7 +122,7 @@ def run_agent(
 ) -> AgentRun:
     """Run one agent to completion (either `finalize_scorecard` or max-turns halt)."""
 
-    system_prompt = build_system_prompt(ctx.config, role=role)
+    system_prompt = build_system_prompt(ctx.config, role=role) + _facts_injection(ctx)
     if initial_user_message is None:
         initial_user_message = (
             f"Begin the evaluation of {ctx.config.repo_url}. "

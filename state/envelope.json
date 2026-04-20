@@ -22,7 +22,10 @@
       "scripts/watch.sh",
       "scripts/teach.sh",
       "scripts/pilot.sh",
-      "scripts/run_batch.sh"
+      "scripts/run_batch.sh",
+      "scripts/archive-knowledge.sh",
+      "scripts/distillation-trajectory.sh",
+      "state/knowledge/"
     ],
     "file_limits": {
       "_note": "Soft limits; envelope-check warns above, blocks at 3x the limit.",

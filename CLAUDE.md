@@ -19,6 +19,61 @@ short and specific — general wisdom belongs in SPEC.md, skills, or READMEs.
    touches a prohibited path (see `state/envelope.json`) is **out-of-envelope**
    and needs explicit operator sign-off.
 
+## How the student learns (three channels)
+
+Capability distillation across rounds flows through three mechanisms.
+**All three are now wired** as of round 2.
+
+### 1. Taught rules — auto-consumed before escalating
+
+When the teacher replies to an escalation with a `save_rule`, the
+channel persists the rule into `teacher_rules.jsonl`. On subsequent
+escalation attempts, [scout/tools/escalate_tool.py](scout/tools/escalate_tool.py)
+calls `rules_store.match(phase=kind, msg=summary+context)` **before**
+consuming an escalation slot or contacting the teacher. A match
+short-circuits with `verdict=skip, via_rule=true` — the student handles
+the situation autonomously with the teacher's prior guidance.
+
+Net effect: the `N`th time the student hits "sbt build unsupported",
+it applies the taught-skip rule and never bothers the teacher again.
+The `taught_rule_skips` counter in `docs/trajectory.md` should rise
+while `escalations` falls — that's the distillation curve.
+
+### 2. Teacher-curated facts — injected into LLM prompts
+
+When the teacher replies with `save_fact`, the channel writes to
+`teacher_facts.jsonl`. On every LLM turn, [scout/agent.py::_facts_injection](scout/agent.py)
+pulls `facts_store.match(scope='global')` + `match(scope='repo', target=repo_url)`
+and prepends them to the system prompt as "Teacher-curated facts
+(authoritative)". The facts_store is mtime-gated, so a fact saved
+mid-run is visible on the next turn.
+
+Use this for program-specific domain knowledge the student can't derive
+from tool output — e.g. "commons-imaging's TIFF module has a separate
+coverage config under imaging-formats-tiff/target/jacoco.xml", or a
+maintainer's preferred style that affects testability scoring.
+
+### 3. Between-rounds student-source edits — the outer loop
+
+For patterns that should become **heuristics** (not per-case lookups),
+the teacher's between-rounds session edits `scout/prompts.py` or
+`state/project_handlers.jsonl` within the modification envelope (see
+the playbook below). A prompt edit is durable, distilled across all
+future runs, and shows up in `git log`. This is the teacher-student
+skill's outer loop.
+
+**Persistence across runs.** Per-run `teacher_*.jsonl` are aggregated
+into `state/knowledge/teacher_*.jsonl` by `scripts/archive-knowledge.sh`
+(invoked by `push-round.sh`). At the next `evaluate_repo` call,
+`scout/student.py::_seed_knowledge` copies `state/knowledge/*.jsonl` into
+the fresh run directory, so the supervisor channel picks them up on
+initialisation.
+
+**Paper-grade artifact.** `scripts/distillation-trajectory.sh` produces
+`docs/trajectory.md` — per-round verifier pass-rate, adversarial
+refutations, and taught-rule skip counts, with ascii sparkline trends.
+This is the primary exhibit for SPEC §10 criterion 5.
+
 ## Between-rounds teacher playbook
 
 The outer loop: the teacher reads each round's collected git history +

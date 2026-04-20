@@ -8,6 +8,7 @@ the evaluation (returning a flag the agent must respect).
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from ..agent_context import AgentContext
@@ -26,18 +27,18 @@ VALID_KINDS = {
 }
 
 
+def _escalate_env_gate() -> bool:
+    """Whether `ESCALATE=1` is set — the two-gate activation.
+
+    When unset, `escalate()` returns a synthesised 'teacher not attached'
+    result immediately instead of blocking for the channel timeout. The
+    rules/facts/findings stores remain live regardless.
+    """
+    return os.environ.get("ESCALATE", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _make_escalate(ctx: AgentContext):
     def _fn(args: dict[str, Any]) -> dict[str, Any]:
-        if ctx.escalations_used >= ctx.config.escalation_budget:
-            return {
-                "ok": False,
-                "budget_exceeded": True,
-                "error": (
-                    f"escalation budget of {ctx.config.escalation_budget} already consumed; "
-                    "finalize the scorecard with viable_target=false and abandon further probes."
-                ),
-            }
-
         kind = str(args.get("kind", "other"))
         if kind not in VALID_KINDS:
             kind = "other"
@@ -49,16 +50,50 @@ def _make_escalate(ctx: AgentContext):
         artifacts = list(args.get("artifacts") or [])
         hints = list(args.get("student_hints") or [])
 
+        # ── taught-rule short-circuit ──────────────────────────────────────
+        # Before consuming an escalation slot or bothering the teacher,
+        # check whether a previously-saved rule covers this case. A match
+        # means "the teacher already taught us to skip this class of
+        # problem"; apply the taught skip autonomously.
+        if ctx.channel.rules_store is not None:
+            try:
+                ctx.channel.rules_store.reload()
+            except Exception as exc:  # noqa: BLE001
+                log.warning("rules_store.reload failed: %s", exc)
+            msg = summary + " " + (context.get("error_msg") or "") + " " + (context.get("error") or "")
+            rule = ctx.channel.rules_store.match(phase=kind, msg=msg)
+            if rule is not None:
+                log.info("escalate: taught-rule skip (kind=%s, reason=%s)", kind, rule.reason)
+                return {
+                    "ok": True,
+                    "verdict": "skip",
+                    "via_rule": True,
+                    "rule_reason": rule.reason,
+                    "notes": f"taught-skip rule applied: {rule.reason}",
+                    "escalations_used": ctx.escalations_used,  # NOT incremented
+                }
+
+        if ctx.escalations_used >= ctx.config.escalation_budget:
+            return {
+                "ok": False,
+                "budget_exceeded": True,
+                "error": (
+                    f"escalation budget of {ctx.config.escalation_budget} already consumed; "
+                    "finalize the scorecard with viable_target=false and abandon further probes."
+                ),
+            }
+
         ctx.escalations_used += 1
 
-        if not ctx.channel.enabled:
-            # Mirror the disabled-channel contract: caller gets a no-op resolution
-            # and must fall back to default abandonment.
+        if not _escalate_env_gate() or not ctx.channel.enabled:
+            # ESCALATE is not set — the student is running autonomously.
+            # Return a synthetic 'teacher not attached' result; the caller
+            # falls back to its default abandonment path (same as a timeout).
             return {
                 "ok": True,
                 "disabled": True,
                 "verdict": "skip",
-                "notes": "channel disabled — fall back to default abandonment",
+                "notes": "ESCALATE not set or channel disabled — fall back to default abandonment",
                 "escalations_used": ctx.escalations_used,
             }
 

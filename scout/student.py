@@ -19,11 +19,43 @@ from .adversarial import is_enabled as adversarial_is_enabled
 from .adversarial import run_adversarial_phase
 from .agent import run_agent
 from .agent_context import AgentContext
-from .config import ScoutConfig, build_config
+from .config import REPO_ROOT, ScoutConfig, build_config
 from .llm import LLMClient, LLMError
 from .supervisor_channel import StudentAbort, StudentRestart, SupervisorChannel
 from .swarm import run_swarm
 from .verifier import verify
+
+PERSISTENT_KNOWLEDGE_DIR = REPO_ROOT / "state" / "knowledge"
+KNOWLEDGE_FILES = ("teacher_rules.jsonl", "teacher_facts.jsonl", "teacher_findings.jsonl")
+
+
+def _seed_knowledge(run_dir: Path) -> dict[str, int]:
+    """Copy persistent teacher knowledge into this run's channel dir.
+
+    The supervisor channel reads teacher_*.jsonl from `run_dir`. To make
+    knowledge *stick across rounds*, we snapshot the committed
+    `state/knowledge/teacher_*.jsonl` into the fresh run directory before
+    the channel initialises. Without this, every run starts with empty
+    rules/facts/findings regardless of what the teacher taught in prior runs.
+    """
+    stats: dict[str, int] = {"seeded_files": 0, "seeded_lines": 0}
+    if not PERSISTENT_KNOWLEDGE_DIR.exists():
+        return stats
+    for name in KNOWLEDGE_FILES:
+        src = PERSISTENT_KNOWLEDGE_DIR / name
+        if not src.exists() or src.stat().st_size == 0:
+            continue
+        dst = run_dir / name
+        if dst.exists() and dst.stat().st_size > 0:
+            continue  # run already has its own copy (idempotent)
+        try:
+            data = src.read_bytes()
+            dst.write_bytes(data)
+            stats["seeded_files"] += 1
+            stats["seeded_lines"] += data.count(b"\n")
+        except OSError as exc:
+            log.warning("knowledge seed: failed for %s: %s", name, exc)
+    return stats
 
 log = logging.getLogger(__name__)
 
@@ -122,14 +154,14 @@ def _post_verifier_review(ctx: AgentContext, report, sc_path: Path) -> None:
 
 
 def _init_channel(config: ScoutConfig) -> SupervisorChannel:
-    # The student always constructs a channel pointing at its run_dir, so
-    # heartbeats + durable stores are populated even when ESCALATE is unset.
-    # SupervisorChannel.escalate() is disabled internally unless the opt-in
-    # env var is set (see .from_env); we bypass that here deliberately so a
-    # parallel-repo driver can set env once and each repo's channel still
-    # points at the right directory.
-    opt_in = os.environ.get("ESCALATE", "").lower() in {"1", "true", "yes", "on"}
-    return SupervisorChannel(config.run_dir if opt_in else None)
+    # Always point the channel at the run_dir so rules_store, facts_store,
+    # and findings_store are live for autonomous consultation. Whether
+    # escalate() *actually* blocks waiting for a teacher is controlled by
+    # ESCALATE=1 in escalate_tool.py — not by the channel itself. This
+    # matches the teacher-student-loop guidance: a mature student runs
+    # with SUPERVISOR_DIR set so rules/facts are honored, but without
+    # ESCALATE so it doesn't round-trip for cases it can handle alone.
+    return SupervisorChannel(config.run_dir)
 
 
 def evaluate_repo(
@@ -154,8 +186,15 @@ def evaluate_repo(
     _configure_logging(config.run_dir)
 
     log.info("student: start eid=%s url=%s swarm=%d", eid, repo_url, config.swarm_size)
+    seed_stats = _seed_knowledge(config.run_dir)
+    if seed_stats["seeded_files"]:
+        log.info("student: seeded %d durable-knowledge file(s) (%d lines) from state/knowledge/",
+                 seed_stats["seeded_files"], seed_stats["seeded_lines"])
     channel = _init_channel(config)
-    channel.heartbeat({"phase": "start", "repo": repo_url, "swarm_size": config.swarm_size})
+    channel.heartbeat({
+        "phase": "start", "repo": repo_url, "swarm_size": config.swarm_size,
+        "knowledge_seeded": seed_stats["seeded_files"],
+    })
     ctx = AgentContext(config=config, channel=channel)
 
     if not config.llm.is_configured():
@@ -243,7 +282,8 @@ def evaluate_repo(
             except Exception as exc:  # noqa: BLE001
                 log.warning("student: verifier crashed: %s", exc)
                 report = None
-            if report is not None and not report.accepted and channel.enabled:
+            if (report is not None and not report.accepted and channel.enabled
+                    and os.environ.get("ESCALATE", "").lower() in {"1", "true", "yes", "on"}):
                 _post_verifier_review(ctx, report, sc_path)
 
     return StudentResult(

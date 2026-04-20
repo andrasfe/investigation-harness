@@ -20,12 +20,17 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any
 
 from ..agent_context import AgentContext
 from ..llm import ToolSpec
 from ..models import Scorecard, compute_composite
 from ..supervisor_channel import StudentAbort, StudentRestart
+
+
+def _escalate_env_gate() -> bool:
+    return os.environ.get("ESCALATE", "").strip().lower() in {"1", "true", "yes", "on"}
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +122,7 @@ def _make_finalize(ctx: AgentContext):
         pre_verify = _pre_verify_summary(draft_scorecard)
 
         teacher_patch: dict[str, Any] = {}
-        if ctx.channel.enabled and ctx.escalations_used < ctx.config.escalation_budget:
+        if ctx.channel.enabled and _escalate_env_gate() and ctx.escalations_used < ctx.config.escalation_budget:
             log.info("finalize: escalating pre_finalize_review to teacher")
             ctx.escalations_used += 1
             reso = ctx.channel.escalate(
