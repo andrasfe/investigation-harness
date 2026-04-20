@@ -1,0 +1,28 @@
+{
+  "challenger_version": "5b0fa8b3a458",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "evaluation_id": "round3-20260420-163846-JSqlParser",
+  "items": [
+    {
+      "ts": 1776728448.5711172,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 126,
+      "challenger_value": 107,
+      "rationale": "Re-running git_log_analyze with patterns ['fix', 'bug'] for the last 24 months yielded 107 commits, which is a material difference (>25%) from the proposer's 126.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    },
+    {
+      "ts": 1776728448.5718908,
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 0,
+      "challenger_value": 100,
+      "rationale": "The proposer claimed 0 commits in the last 12 months, but github_api_query shows recent activity (e.g., commit 2b141568 from 2026-04-12).",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted bug_fix_commits_24mo (126 -> 107) and maintainer_activity.commits_last_12mo (0 -> active).",
+  "notes": ""
+}

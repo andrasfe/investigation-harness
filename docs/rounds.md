@@ -21,3 +21,11 @@
 - proposer turns: 18; no escalations; no adversarial
 - verifier: rejected on plausibility (viable_target=true vs clean_build_succeeded=false)
 - outcome: infrastructure works; weak-LLM synthesis gap identified → motivated round 1 countermeasures
+
+## 2026-04-20 — round 3 — field-extraction table added to prompt
+
+- pattern: prior rounds had `build_system="other"` and `bug_fix_commits=0` despite tools returning real values
+- edit: added an explicit "FIELD EXTRACTION DISCIPLINE" table at the top of `FULL_AGENT_INSTRUCTIONS` mapping every scorecard field to the tool-result key it must be copied from
+- outcome: **verifier accepted=True (all 4 layers)**. Scorecard now has `build_system: maven`, `bug_fix_commits_24mo: 126`, correct `viable_target: false` in dry-run. Student correctly abstains from claiming viability when tools report synthetic success.
+- next: add dry-run detection + Apache project_handlers
+

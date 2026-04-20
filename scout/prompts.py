@@ -53,6 +53,45 @@ returns (which it won't — it ends the run).
 
 
 FULL_AGENT_INSTRUCTIONS = """\
+# CRITICAL — before anything else: FIELD EXTRACTION DISCIPLINE
+
+Every tool you call returns a JSON object. **Never invent values.** When you
+call `finalize_scorecard` you MUST echo the values from prior tool results
+verbatim. The mapping below is mandatory; the verifier rejects any scorecard
+whose fields contradict the tool trace.
+
+| scorecard field (dotted path) | COPY FROM this tool result key |
+|---|---|
+| `build.build_system` | `run_build.build_system` (NOT "other" unless run_build said so) |
+| `build.clean_build_succeeded` | `run_build.clean_build_succeeded` |
+| `build.clean_build_time_seconds` | `run_build.clean_build_time_seconds` |
+| `tests.test_count` | `run_tests.test_count` |
+| `tests.test_pass_rate` | `run_tests.test_pass_rate` |
+| `tests.test_run_succeeded` | `run_tests.test_run_succeeded` (true only if test_count > 0 AND the tool returned ok=true) |
+| `tests.test_run_time_seconds` | `run_tests.test_run_time_seconds` |
+| `coverage.tool_used` | `run_coverage.tool_used` (only 'jacoco' if run_coverage actually ran; else 'other') |
+| `coverage.line_coverage_percent_overall` | `run_coverage.line_coverage_percent_overall` |
+| `coverage.branch_coverage_percent_overall` | `run_coverage.branch_coverage_percent_overall` |
+| `coverage.per_module_coverage` | `run_coverage.per_module_coverage` (copy the whole array) |
+| `bug_history.bug_fix_commits_24mo` | `git_log_analyze.bug_fix_commit_count` — **NOT 0 unless the tool returned 0** |
+| `bug_history.sampled_bug_fixes` | Transform each entry of `git_log_analyze.sampled` into `{commit_sha, commit_message_excerpt, files_changed, plausibly_test_catchable, rationale}` |
+| `testability_signals.reflection_density` | `static_analysis.reflection_density` |
+| `testability_signals.static_state_density` | `static_analysis.static_state_density` |
+| `testability_signals.filesystem_assumptions` | `static_analysis.filesystem_assumptions` |
+| `testability_signals.thread_sleep_count` | `static_analysis.thread_sleep_count` |
+| `testability_signals.external_service_dependencies` | `static_analysis.external_service_dependencies` |
+| `repo_metadata.stars` | `github_api_query` on `/repos/{owner}/{repo}` → `data.stargazers_count` |
+| `repo_metadata.primary_license` | same response → `data.license.spdx_id` (or empty string) |
+| `repo_metadata.last_commit_date` | same response → `data.pushed_at` |
+| `maintainer_activity.distinct_committers_12mo` | github_api_query on `/contributors` → length of the returned list |
+
+Before you call `finalize_scorecard`, review every scorecard field against
+its source tool result in the trace. If any tool result says `ok: false`
+(e.g. because run_coverage reported `should_escalate: true`), leave the
+corresponding scorecard fields at the safe default (0 / false / "other")
+and set `recommendation.viable_target=false`. **A contradiction between a
+field value and the tool result that produced it is an automatic rejection.**
+
 # Evaluation recipe (single-agent mode)
 
 Follow these phases in order. Each phase builds on the previous.
