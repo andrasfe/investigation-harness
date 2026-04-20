@@ -11,14 +11,88 @@ short and specific — general wisdom belongs in SPEC.md, skills, or READMEs.
    appending one JSON line to `resolutions.jsonl`. Prefer the
    [teacher-student-loop skill's teaching-at-runtime reference](~/.claude/skills/teacher-student-loop/references/teaching-at-runtime.md)
    over guessing. Use `bash scripts/teach.sh <batch_dir>` to stream events.
-2. **Between rounds** → read the round's `batch_summary.json`,
-   `selection_memo.md`, and any new `teacher_findings.jsonl`. Decide which
-   findings warrant a student-code edit; apply within the
-   [modification envelope (SPEC §6.1)](SPEC.md).
+2. **Between rounds** → follow the playbook below. You look at what the
+   student got wrong this round and edit its source code to prevent the
+   same mistake next round — within the modification envelope.
 3. **Extending scout itself** → consult the beads backlog (`bd ready`),
    read [SPEC.md](SPEC.md), and respect the envelope. Any change that
-   touches `scout/tools/__init__.py`, `scout/models.py`, or the verifier
-   schema is **out-of-envelope** and needs explicit operator sign-off.
+   touches a prohibited path (see `state/envelope.json`) is **out-of-envelope**
+   and needs explicit operator sign-off.
+
+## Between-rounds teacher playbook
+
+The outer loop: the teacher reads each round's collected git history +
+verifier results + findings, identifies recurring student mistakes, and
+edits the student source (prompts, project handlers, config defaults)
+within the mechanical envelope defined in [state/envelope.json](state/envelope.json).
+
+**Step 1 — Pull + generate report.**
+```bash
+git pull origin main
+bash scripts/between-rounds-report.sh
+# → writes docs/round-report-N.md
+```
+
+The report aggregates: git log since last `round-N` tag, every
+`verifier_report.json` in `docs/memos/`, every `viability_challenge.json`
+(V2.5 refutations), every `teacher_findings.jsonl` across runs, and a
+beads backlog snapshot. Read it in one pass.
+
+**Step 2 — Diagnose.** You are looking for **recurring** failures. One
+outlier is noise; a pattern across ≥2 runs is the signal. Typical
+patterns and their remedies:
+
+| Observed pattern | Remedy | File to edit |
+|------------------|--------|--------------|
+| Student repeatedly writes `bug_fix_commits_24mo=0` when `evidence.json` shows a real count | Tighten the Phase F section of `FULL_AGENT_INSTRUCTIONS` to force echo-from-evidence | `scout/prompts.py` |
+| Apache projects keep escalating on bug-mining | Add the `[PROJ-###]` pattern to default heuristics (prompts or project handler) | `scout/prompts.py` or `state/project_handlers.jsonl` |
+| `build_system="other"` + `clean_build_succeeded=true` recurring | The finalize prompt already warns; consider a project handler per-org | `state/project_handlers.jsonl` |
+| Coverage reports missing on gradle repos | Add "if build_system=gradle, coverage path is build/reports/jacoco/test/jacocoTestReport.xml" to the prompt | `scout/prompts.py` |
+| Tool-call budget exceeded consistently | Raise `SCOUT_MAX_TOOL_CALLS` default | `scout/config.py` (allowed_defaults only) |
+
+If the pattern points to a change **out of envelope** (new tool, schema
+change, verifier weakening) — **do not apply it**. Open a beads issue and
+escalate to the operator. The envelope is load-bearing: the paper
+contribution depends on the teacher not silently expanding scope.
+
+**Step 3 — Apply the edit.** Small, specific. A between-round edit should
+touch one or two files, add ≤120 lines per file, and have a clear
+one-line summary.
+
+**Step 4 — Validate against the envelope.**
+```bash
+git add <edited files>
+bash scripts/envelope-check.sh
+```
+Exit 0 → you're inside the envelope. Exit 2/3 → stop; you're
+out-of-envelope. Either revert, shrink the change, or escalate.
+
+**Step 5 — Canary regression (when available; bead `ih2`).** Until V5 is
+wired, run a stability probe on one canary:
+```bash
+SCOUT_DRY_RUN=1 python -m scout.main evaluate \
+  https://github.com/JSQLParser/JSqlParser --runs 3
+```
+Composite stdev should be within prior tolerance. If it drifts wildly,
+your edit may have regressed an adjacent capability.
+
+**Step 6 — Commit + tag + push.**
+```bash
+git commit -m "scout: round N+1 student update — <one-line summary>"
+bash scripts/tag-round.sh          # tags round-N+1 on HEAD
+git push origin main --tags
+```
+
+**Step 7 — Record the reasoning.** Append an entry to [docs/rounds.md](docs/rounds.md)
+that names: the pattern observed, the edit you made, and the expected
+next-round signal (so the next between-rounds teacher session can verify).
+
+**Activating the enforcement hook (one-time, per clone):**
+```bash
+git config core.hooksPath .githooks
+```
+This runs `scripts/envelope-check.sh` before every commit. Operator
+override (explicit structural refactor): `SCOUT_SKIP_ENVELOPE=1 git commit ...`.
 
 ## Invariants (do not violate)
 

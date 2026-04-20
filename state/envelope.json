@@ -1,0 +1,83 @@
+{
+  "_spec_ref": "SPEC.md §6.1 (permitted modifications) and §6.2 (prohibited).",
+  "_purpose": "Mechanical enforcement of the between-round modification envelope. The teacher's edits between rounds are validated against this file by scripts/envelope-check.sh. A path listed in 'prohibited' (or not listed anywhere) requires explicit human sign-off to change.",
+
+  "schema_version": 1,
+
+  "permitted": {
+    "_note": "Paths the teacher MAY edit between rounds as part of capability distillation. Edits here trigger canary regression but do not require out-of-envelope review.",
+    "paths": [
+      "scout/prompts.py",
+      "state/project_handlers.jsonl",
+      "canaries/",
+      "docs/",
+      "CLAUDE.md",
+      "README.md",
+      "scripts/between-rounds-report.sh",
+      "scripts/tag-round.sh",
+      "scripts/push-round.sh",
+      "scripts/review-packet.sh",
+      "scripts/reply.sh",
+      "scripts/launch.sh",
+      "scripts/watch.sh",
+      "scripts/teach.sh",
+      "scripts/pilot.sh",
+      "scripts/run_batch.sh"
+    ],
+    "file_limits": {
+      "_note": "Soft limits; envelope-check warns above, blocks at 3x the limit.",
+      "max_changed_lines_per_file": 120,
+      "max_files_per_commit": 8
+    },
+    "config_keys": {
+      "_note": "Env-var defaults that may be tuned in scout/config.py. Any other config-file change is out-of-envelope.",
+      "allowed_defaults": [
+        "SCOUT_MAX_TOOL_CALLS",
+        "SCOUT_ESCALATION_BUDGET",
+        "SCOUT_TIME_BUDGET_SEC",
+        "SCOUT_SWARM_SIZE",
+        "LLM_MODEL"
+      ]
+    }
+  },
+
+  "prohibited": {
+    "_note": "Paths that require explicit human sign-off. Changes here are logged as out-of-envelope and the commit is refused by envelope-check.",
+    "paths": [
+      "scout/tools/__init__.py",
+      "scout/tools/scorecard_writer.py",
+      "scout/tools/escalate_tool.py",
+      "scout/models.py",
+      "scout/verifier/",
+      "scout/supervisor_channel.py",
+      "scout/adversarial.py",
+      "scripts/envelope-check.sh",
+      "state/envelope.json",
+      ".github/workflows/",
+      ".githooks/"
+    ],
+    "reason_by_path": {
+      "scout/tools/__init__.py": "tool surface definition — SPEC §6.2 'no new tool capabilities'",
+      "scout/tools/scorecard_writer.py": "scorecard schema boundary",
+      "scout/tools/escalate_tool.py": "escalation protocol — SPEC §6.2",
+      "scout/models.py": "scorecard schema — SPEC §6.2 'no schema expansion'",
+      "scout/verifier/": "verifier is authoritative (SPEC §5.2); teacher cannot override",
+      "scout/supervisor_channel.py": "copied verbatim from teacher-student-loop skill; fork the wrapper, not the reference",
+      "scout/adversarial.py": "Judge is authoritative at V2.5",
+      "scripts/envelope-check.sh": "changes to the envelope validator itself require human sign-off",
+      "state/envelope.json": "the envelope itself requires human sign-off to edit",
+      ".github/workflows/": "CI definitions are security-relevant",
+      ".githooks/": "hooks that enforce the envelope"
+    }
+  },
+
+  "security_sensitive": {
+    "_note": "Always require human approval regardless of envelope status. Independent of other categories.",
+    "paths": [
+      ".env",
+      ".env.example",
+      "scout/config.py",
+      "scout/llm.py"
+    ]
+  }
+}
