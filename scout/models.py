@@ -105,11 +105,52 @@ class ScoreBlock:
 
 
 @dataclass
+class ViabilityEvidence:
+    """One justification item backing `recommendation.viable_target`.
+
+    Every item must reference a concrete observed signal — a tool call result,
+    a scorecard field, or a computed ratio. Free-form prose without a
+    `metric` reference is rejected by the verifier's viability layer.
+    """
+
+    criterion: str           # e.g. "build_tractable" | "coverage_gap" | "testability_tractable" | "bug_corpus"
+    metric: str              # scorecard field path or tool result key, e.g. "coverage.line_coverage_percent_overall"
+    observed_value: Any      # the number/string actually observed
+    threshold: str = ""      # human-readable threshold, e.g. "<80%" or ">=10 commits"
+    satisfied: bool = True
+    rationale: str = ""      # plain-English (short) why this evidence supports viability
+
+
+@dataclass
+class PilotResult:
+    """Result of a pilot run (SPEC §9.4). Populated AFTER scout finalizes.
+
+    Scout itself does not produce this block — the pilot runner (a
+    separate general-purpose agent) appends it to the scorecard. Treat
+    `ran=false` as "pilot has not been attempted yet".
+    """
+
+    ran: bool = False
+    target_class: str = ""
+    target_module: str = ""
+    agent: str = ""                     # identifier of the pilot agent used
+    pilot_compiled: bool = False
+    pilot_passed: bool = False
+    pilot_coverage_delta_percent: float = 0.0
+    pilot_turns: int = 0
+    pilot_cost_usd: float = 0.0
+    pilot_escalations: int = 0
+    notes: str = ""
+
+
+@dataclass
 class Recommendation:
     viable_target: bool = False
     recommended_submodule: str | None = None
     notes: str = ""
     estimated_coverage_delta_achievable: float | None = None
+    viability_evidence: list[ViabilityEvidence] = field(default_factory=list)
+    pilot_result: PilotResult = field(default_factory=PilotResult)
 
 
 @dataclass
@@ -190,7 +231,20 @@ class Scorecard:
         ma = _wrap(MaintainerActivityInfo, data.get("maintainer_activity"))
         ts = _wrap(TestabilitySignals, data.get("testability_signals"))
         sb = _wrap(ScoreBlock, data.get("score"))
-        rec = _wrap(Recommendation, data.get("recommendation"))
+        rec_raw = data.get("recommendation") or {}
+        ve_raw = rec_raw.get("viability_evidence") or []
+        ve = [v if isinstance(v, ViabilityEvidence) else ViabilityEvidence(**v)
+              for v in ve_raw]
+        pilot_raw = rec_raw.get("pilot_result") or {}
+        pilot = pilot_raw if isinstance(pilot_raw, PilotResult) else PilotResult(**pilot_raw)
+        rec = Recommendation(
+            viable_target=bool(rec_raw.get("viable_target", False)),
+            recommended_submodule=rec_raw.get("recommended_submodule"),
+            notes=str(rec_raw.get("notes", "")),
+            estimated_coverage_delta_achievable=rec_raw.get("estimated_coverage_delta_achievable"),
+            viability_evidence=ve,
+            pilot_result=pilot,
+        )
         md = _wrap(ScorecardMetadata, data.get("metadata"))
         return cls(
             evaluation_id=data.get("evaluation_id", ""),

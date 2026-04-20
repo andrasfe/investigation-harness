@@ -9,17 +9,21 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .adversarial import is_enabled as adversarial_is_enabled
+from .adversarial import run_adversarial_phase
 from .agent import run_agent
 from .agent_context import AgentContext
 from .config import ScoutConfig, build_config
 from .llm import LLMClient, LLMError
 from .supervisor_channel import StudentAbort, StudentRestart, SupervisorChannel
 from .swarm import run_swarm
+from .verifier import verify
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +41,86 @@ class StudentResult:
     errors: list[str]
 
 
+def _post_verifier_review(ctx: AgentContext, report, sc_path: Path) -> None:
+    """Escalate a verifier rejection back to the teacher.
+
+    Runs OUTSIDE the agent loop: the student LLM has already exited. The
+    teacher's reply is applied to the scorecard on disk directly (no LLM
+    round-trip). Verdicts:
+        patch    → merge Resolution.fix into the scorecard, re-verify once
+        skip     → leave the rejection in place (record as post_verifier_acknowledged)
+        abort    → delete the scorecard (escalation will fail the evaluation)
+        restart  → flag the scorecard with post_verifier_requested_rerun (student
+                   driver doesn't retry itself; outer loop should)
+    """
+    rejected_issues: list[str] = []
+    for layer in report.layers:
+        if not layer.ok:
+            rejected_issues.extend([f"{layer.name}: {i}" for i in layer.issues or []])
+    log.info("post_verifier_review: escalating %d rejection issue(s)", len(rejected_issues))
+    reso = ctx.channel.escalate(
+        kind="end_of_cycle_review",
+        summary=(
+            f"verifier REJECTED scorecard for {ctx.config.repo_url}: "
+            f"{len(rejected_issues)} issue(s) across layers"
+        ),
+        context={
+            "phase": "post_verifier_review",
+            "layer_issues": rejected_issues,
+            "scorecard_path": str(sc_path),
+            "verifier_report": report.to_dict(),
+        },
+        artifacts=[str(sc_path), str(ctx.config.run_dir / "verifier_report.json")],
+        student_hints=[
+            "Reply verdict=patch with Resolution.fix to correct fields on disk; we will re-verify once.",
+            "Reply verdict=skip to record acknowledgement without changes.",
+            "Reply verdict=abort to delete the scorecard (evaluation fails cleanly).",
+        ],
+        timeout_sec=600.0,
+    )
+    if reso is None:
+        log.warning("post_verifier_review: no reply before timeout — leaving rejection in place")
+        return
+    if reso.verdict == "abort":
+        try:
+            sc_path.unlink()
+        except OSError:
+            pass
+        ctx.errors.append(f"post_verifier_review_abort: {reso.notes}")
+        return
+    if reso.verdict == "restart":
+        (ctx.config.run_dir / "post_verifier_requested_rerun").write_text(
+            reso.notes or "restart", encoding="utf-8",
+        )
+        return
+    if reso.verdict == "patch" and reso.fix:
+        try:
+            draft = json.loads(sc_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return
+        # flat field-path → value patch (same shape as pre_finalize patch)
+        for path, value in reso.fix.items():
+            if not isinstance(path, str) or "." not in path:
+                continue
+            parts = path.split(".")
+            cur = draft
+            for p in parts[:-1]:
+                if not isinstance(cur.get(p), dict):
+                    cur = None
+                    break
+                cur = cur[p]
+            if cur is None:
+                continue
+            cur[parts[-1]] = value
+        md = draft.setdefault("metadata", {})
+        md["teacher_patched_post_verifier"] = sorted(reso.fix.keys())
+        sc_path.write_text(json.dumps(draft, indent=2, default=str), encoding="utf-8")
+        try:
+            verify(ctx.config.run_dir)  # re-verify once; writes updated verifier_report.json
+        except Exception as exc:  # noqa: BLE001
+            log.warning("post_verifier_review: re-verify failed: %s", exc)
+
+
 def _init_channel(config: ScoutConfig) -> SupervisorChannel:
     # The student always constructs a channel pointing at its run_dir, so
     # heartbeats + durable stores are populated even when ESCALATE is unset.
@@ -44,7 +128,6 @@ def _init_channel(config: ScoutConfig) -> SupervisorChannel:
     # env var is set (see .from_env); we bypass that here deliberately so a
     # parallel-repo driver can set env once and each repo's channel still
     # points at the right directory.
-    import os
     opt_in = os.environ.get("ESCALATE", "").lower() in {"1", "true", "yes", "on"}
     return SupervisorChannel(config.run_dir if opt_in else None)
 
@@ -126,6 +209,42 @@ def evaluate_repo(
                 sc_path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
             except (OSError, json.JSONDecodeError) as exc:
                 log.warning("student: failed to stamp duration: %s", exc)
+
+            # Adversarial phase (Challenger + Judge) — opt-in via
+            # SCOUT_ADVERSARIAL=1. Runs between Proposer finalization and
+            # the deterministic verifier so Layer 2.5 sees the judge's
+            # ruling. Uses a fresh LLMClient (may be configured to a
+            # different model via SCOUT_CHALLENGER_MODEL in future).
+            if adversarial_is_enabled(config):
+                channel.heartbeat({"phase": "adversarial_start"})
+                try:
+                    chall_model = os.environ.get("SCOUT_CHALLENGER_MODEL", config.llm.model)
+                    chall_client = LLMClient(
+                        api_key=config.llm.api_key,
+                        model=chall_model,
+                        base_url=config.llm.base_url,
+                        app_name="scout-challenger",
+                    )
+                    vc = run_adversarial_phase(ctx=ctx, client=chall_client)
+                    channel.heartbeat({
+                        "phase": "adversarial_done",
+                        "passed": bool(vc and vc.passed),
+                        "challenges": (vc.challenge_count if vc else 0),
+                    })
+                except Exception as exc:  # noqa: BLE001
+                    log.warning("student: adversarial phase crashed: %s", exc)
+                    ctx.errors.append(f"adversarial_crash: {exc}")
+
+            # V3/V2 — run verifier and emit a post_verifier_review escalation
+            # if it rejects. The teacher has one last window to triage
+            # (patch + re-verify, approve-as-invalid, or mark for rerun).
+            try:
+                report = verify(config.run_dir)
+            except Exception as exc:  # noqa: BLE001
+                log.warning("student: verifier crashed: %s", exc)
+                report = None
+            if report is not None and not report.accepted and channel.enabled:
+                _post_verifier_review(ctx, report, sc_path)
 
     return StudentResult(
         evaluation_id=eid,

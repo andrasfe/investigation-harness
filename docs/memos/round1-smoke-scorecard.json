@@ -1,0 +1,109 @@
+{
+  "evaluation_id": "scout-20260420-125254-JSqlParser",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "repo_metadata": {
+    "name": "",
+    "stars": 0,
+    "downloads_last_12mo": null,
+    "primary_license": "",
+    "last_commit_date": ""
+  },
+  "build": {
+    "build_system": "other",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": true,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 0,
+    "sampled_bug_fixes": []
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 0,
+    "distinct_committers_12mo": 0,
+    "median_pr_merge_time_days": null,
+    "last_release_date": null
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "low",
+    "external_service_dependencies": [],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 0,
+    "coverage_gap_value": 0,
+    "testability": 0,
+    "bug_history_richness": 0,
+    "maintainer_responsiveness": 0,
+    "composite": 0.0
+  },
+  "recommendation": {
+    "viable_target": true,
+    "recommended_submodule": null,
+    "notes": "Project is highly viable. It has a clean build, a rich history of bug fixes, and low testability hurdles. Coverage is reported as 0% by the tool, indicating a significant gap for TestWright to fill.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [
+      {
+        "criterion": "build_tractable",
+        "metric": "build.clean_build_succeeded",
+        "observed_value": true,
+        "threshold": "true",
+        "satisfied": true,
+        "rationale": "The project builds successfully with Maven."
+      },
+      {
+        "criterion": "coverage_gap",
+        "metric": "coverage.line_coverage_percent_overall",
+        "observed_value": 0,
+        "threshold": "<80%",
+        "satisfied": true,
+        "rationale": "Line coverage is well below 80%."
+      },
+      {
+        "criterion": "testability_tractable",
+        "metric": "static_analysis.reflection_density",
+        "observed_value": "low",
+        "threshold": "not high",
+        "satisfied": true,
+        "rationale": "Reflection and static state densities are low."
+      }
+    ],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "5337765a41ba",
+    "evaluation_duration_seconds": 62,
+    "escalation_count": 0,
+    "errors_encountered": []
+  }
+}

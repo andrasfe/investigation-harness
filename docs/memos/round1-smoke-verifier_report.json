@@ -1,0 +1,67 @@
+{
+  "run_dir": "/Users/andraslferenczi/investigation-harness/runs/scout-20260420-125254-JSqlParser",
+  "scorecard_path": "/Users/andraslferenczi/investigation-harness/runs/scout-20260420-125254-JSqlParser/scorecard.json",
+  "accepted": false,
+  "layers": [
+    {
+      "name": "schema",
+      "ok": true,
+      "issues": [],
+      "details": {}
+    },
+    {
+      "name": "plausibility",
+      "ok": false,
+      "issues": [
+        "tests.test_run_succeeded=true but test_count=0 (no tests actually ran)",
+        "build.clean_build_succeeded=true but build_system='other' (run_build couldn't identify the system)"
+      ],
+      "details": {}
+    },
+    {
+      "name": "adversarial",
+      "ok": false,
+      "issues": [
+        "viable_target=true but adversarial judge REFUTED 2 claim(s): ['bug_history.bug_fix_commits_24mo', 'maintainer_activity.commits_last_12mo']"
+      ],
+      "details": {
+        "ran": true,
+        "passed": false,
+        "challenge_count": 2,
+        "refuted_fields": [
+          "bug_history.bug_fix_commits_24mo",
+          "maintainer_activity.commits_last_12mo"
+        ],
+        "teacher_escalated_fields": []
+      }
+    },
+    {
+      "name": "trace",
+      "ok": true,
+      "issues": [],
+      "details": {
+        "tool_calls_in_trace": 17,
+        "distinct_tools": [
+          "file_challenge",
+          "finalize_scorecard",
+          "git_clone",
+          "git_log_analyze",
+          "github_api_query",
+          "run_build",
+          "run_coverage",
+          "run_tests",
+          "static_analysis"
+        ],
+        "evidence_keys": [
+          "bug_history.bug_fix_commits_24mo",
+          "bug_history.sampled_bug_fixes",
+          "testability_signals.external_service_dependencies",
+          "testability_signals.filesystem_assumptions",
+          "testability_signals.reflection_density",
+          "testability_signals.static_state_density",
+          "testability_signals.thread_sleep_count"
+        ]
+      }
+    }
+  ]
+}

@@ -37,16 +37,73 @@ def _setup_logging(verbose: bool) -> None:
 
 
 def cmd_evaluate(args: argparse.Namespace) -> int:
-    result = evaluate_repo(
-        repo_url=args.repo_url,
-        evaluation_id=args.evaluation_id,
-        target_modules=args.target_modules,
+    if args.adversarial:
+        os.environ["SCOUT_ADVERSARIAL"] = "1"
+    runs = max(1, int(args.runs or 1))
+    if runs == 1:
+        result = evaluate_repo(
+            repo_url=args.repo_url,
+            evaluation_id=args.evaluation_id,
+            target_modules=args.target_modules,
+        )
+        print(f"halt: {result.halt_reason}")
+        print(f"run_dir: {result.run_dir}")
+        if result.scorecard_path:
+            print(f"scorecard: {result.scorecard_path}")
+        return 0 if result.halt_reason in ("finalized", "swarm_merged", "ok") else 2
+
+    # Stability probe — V4 layer. Re-evaluate the same repo `runs` times and
+    # report variance across the composite + each subscore.
+    import json, statistics, time as _t
+    from .config import RUNS_DIR
+
+    stability_id = args.evaluation_id or f"stability-{int(_t.time())}"
+    stability_dir = RUNS_DIR / stability_id
+    stability_dir.mkdir(parents=True, exist_ok=True)
+    composites: list[float] = []
+    subscores: dict[str, list[float]] = {k: [] for k in (
+        "build_tractability", "coverage_gap_value", "testability",
+        "bug_history_richness", "maintainer_responsiveness",
+    )}
+    accepted = 0
+    for i in range(runs):
+        res = evaluate_repo(
+            repo_url=args.repo_url,
+            evaluation_id=f"{stability_id}__run{i}",
+            target_modules=args.target_modules,
+            run_dir_override=stability_dir / f"run{i}",
+        )
+        if res.scorecard_path and res.scorecard_path.exists():
+            sc = json.loads(res.scorecard_path.read_text(encoding="utf-8"))
+            composites.append(float((sc.get("score") or {}).get("composite", 0.0)))
+            for k in subscores:
+                subscores[k].append(float((sc.get("score") or {}).get(k, 0)))
+            if (stability_dir / f"run{i}" / "verifier_report.json").exists():
+                vr = json.loads((stability_dir / f"run{i}" / "verifier_report.json").read_text(encoding="utf-8"))
+                accepted += int(bool(vr.get("accepted")))
+
+    def _var(xs):
+        return round(statistics.pstdev(xs), 3) if len(xs) > 1 else 0.0
+
+    summary = {
+        "stability_id": stability_id,
+        "runs": runs,
+        "accepted_count": accepted,
+        "composite": {
+            "values": composites,
+            "mean": round(statistics.mean(composites), 3) if composites else None,
+            "stdev": _var(composites),
+        },
+        "subscores": {k: {"mean": round(statistics.mean(v), 3) if v else None, "stdev": _var(v)}
+                      for k, v in subscores.items()},
+    }
+    (stability_dir / "stability_summary.json").write_text(
+        json.dumps(summary, indent=2), encoding="utf-8"
     )
-    print(f"halt: {result.halt_reason}")
-    print(f"run_dir: {result.run_dir}")
-    if result.scorecard_path:
-        print(f"scorecard: {result.scorecard_path}")
-    return 0 if result.halt_reason in ("finalized", "swarm_merged", "ok") else 2
+    print(json.dumps(summary, indent=2))
+    print(f"stability_dir: {stability_dir}")
+    # Arbitrary pass threshold; tune from data. Bead-tracked.
+    return 0 if summary["composite"]["stdev"] <= 1.0 else 3
 
 
 def cmd_batch(args: argparse.Namespace) -> int:
@@ -97,6 +154,11 @@ def build_parser() -> argparse.ArgumentParser:
     ev.add_argument("repo_url")
     ev.add_argument("--evaluation-id")
     ev.add_argument("--target-modules", nargs="*")
+    ev.add_argument("--runs", type=int, default=1,
+                    help="Stability probe: re-evaluate the same repo N times and report composite variance (V4).")
+    ev.add_argument("--adversarial", action="store_true",
+                    help="Enable the Challenger+Judge pass after the Proposer finalizes (V2.5). "
+                         "Equivalent to SCOUT_ADVERSARIAL=1.")
     ev.set_defaults(func=cmd_evaluate)
 
     bt = sub.add_parser("batch", help="Evaluate every repo in a list file")

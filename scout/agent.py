@@ -32,6 +32,7 @@ from .llm import (
 from .prompts import build_system_prompt
 from .supervisor_channel import StudentAbort, StudentRestart
 from .tools import build_toolset
+from .tools.challenge_tools import ChallengeFinalized
 from .tools.scorecard_writer import ScorecardFinalized
 
 log = logging.getLogger(__name__)
@@ -55,6 +56,8 @@ def _execute_tool(
     try:
         result = tool.fn(args)
     except ScorecardFinalized:
+        raise
+    except ChallengeFinalized:
         raise
     except StudentAbort:
         raise
@@ -103,7 +106,10 @@ def run_agent(
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": initial_user_message},
     ]
-    tools = build_toolset(ctx)
+    # `full` / specialist roles get the full Proposer surface;
+    # `challenger` gets the restricted re-verification set.
+    tool_role = "challenger" if role == "challenger" else "proposer"
+    tools = build_toolset(ctx, role=tool_role)
     tool_map = {t.name: t for t in tools}
 
     run = AgentRun(role=role)
@@ -161,6 +167,12 @@ def run_agent(
                     run.scorecard_path = Path(str(done))
                     run.halt_reason = "finalized"
                     log.info("agent[%s]: scorecard written to %s", role, run.scorecard_path)
+                    return run
+                except ChallengeFinalized as done:
+                    run.finalized = True
+                    run.scorecard_path = Path(str(done))  # actually challenge.json path
+                    run.halt_reason = "challenge_finalized"
+                    log.info("agent[%s]: challenge written to %s", role, run.scorecard_path)
                     return run
                 run.tool_calls_made += 1
                 payload = json.dumps(result, default=str)

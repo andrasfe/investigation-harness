@@ -25,28 +25,34 @@ produce a ranked **selection memo**.
   ┌─────────────────────────────┐
   │ scripts/teach.sh            │  JSONL IPC channel (fsync'd, append-only)
   └─────────────────────────────┘
-                 ▲
-      escalations│ resolutions
-                 ▼
+                 ▲  escalations / resolutions
+                 │
   ┌─────────────────────────────┐
-  │ Student (LLM agent)         │   OpenRouter / OpenAI-compatible
+  │ Proposer (LLM agent)        │   OpenRouter / OpenAI-compatible
   │   single-agent  OR          │   gemini-flash-lite by default
-  │   specialist swarm + judge  │
-  │   (build/coverage/          │   fixed tool surface (SPEC §3.3):
-  │    history/testability)     │     git_clone, run_build, run_tests,
+  │   cooperative specialist    │   fixed tool surface (SPEC §3.3):
+  │   swarm with judge          │     git_clone, run_build, run_tests,
   └─────────────────────────────┘     run_coverage, git_log_analyze,
                  │                    github_api_query, static_analysis,
                  ▼                    escalate, finalize_scorecard
-         scorecard.json
+         scorecard.json (draft)
+                 │
+                 ▼      [opt-in: SCOUT_ADVERSARIAL=1]
+  ┌─────────────────────────────┐
+  │ Challenger (LLM agent)      │   Refutes specific claims using
+  │   read-only re-verifier     │   different tool slices.
+  │      ↓                      │   file_challenge per dispute.
+  │   Judge (deterministic)     │   → viability_challenge.json
+  └─────────────────────────────┘
                  │
                  ▼
   ┌─────────────────────────────┐
-  │ Verifier (SPEC §5)          │   Layer 1 schema • Layer 2 plausibility
-  │                             │   Layer 3 trace-evidence
-  └─────────────────────────────┘   (Layer 4 sampled, 5 canary: backlog)
+  │ Verifier (SPEC §5)          │  L1 schema • L2 plausibility • L2.5 adversarial
+  │                             │  L3 trace-evidence
+  └─────────────────────────────┘  (L4 sampled, L5 canary: backlog)
                  │
                  ▼
-         verifier_report.json
+         verifier_report.json  +  (optional) pilot_result (SPEC §9.4)
 ```
 
 Multi-repo runs fan out under `runs/<batch>/<repo-slug>/`, each with its
@@ -83,7 +89,9 @@ All settings come from `.env` (loaded automatically) or shell env:
 | `LLM_MODEL`                | `google/gemini-2.5-flash-lite`       | Cheap model for the student |
 | `LLM_PROVIDER`             | `openrouter`                         | `openai` also supported |
 | `SCOUT_LLM_BASE_URL`       | `https://openrouter.ai/api/v1`       | Any OpenAI-compatible endpoint |
-| `SCOUT_SWARM_SIZE`         | `1`                                  | `1`=single agent, `≥2`=swarm |
+| `SCOUT_SWARM_SIZE`         | `1`                                  | `1`=single agent, `≥2`=cooperative specialist swarm |
+| `SCOUT_ADVERSARIAL`        | *(unset)*                            | `1` enables Challenger+Judge adversarial pass (V2.5) |
+| `SCOUT_CHALLENGER_MODEL`   | = `LLM_MODEL`                        | Override the model used by the Challenger |
 | `SCOUT_PARALLEL_REPOS`     | `1`                                  | Threads for batch evals |
 | `SCOUT_ESCALATION_BUDGET`  | `3`                                  | Teacher round-trips per repo |
 | `SCOUT_MAX_TOOL_CALLS`     | `60`                                 | Hard cap per agent run |

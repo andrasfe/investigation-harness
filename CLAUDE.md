@@ -39,6 +39,69 @@ short and specific — general wisdom belongs in SPEC.md, skills, or READMEs.
   `StudentRestart`, and `ScorecardFinalized` inherit from `BaseException`
   on purpose. Do not catch them with `except Exception:`.
 
+## Viability validation pipeline (most important)
+
+`recommendation.viable_target=true` is a *prediction* that TestWright
+will succeed. Do not trust it until every layer has signed off:
+
+| Layer | Check | Where | Authoritative? |
+|-------|-------|-------|----------------|
+| V0 | trace-evidence — every numeric claim backed by a tool call | `scout/verifier/trace.py` | yes |
+| V1 | cross-field plausibility — build+tests succeeded, coverage < 80% | `scout/verifier/plausibility.py` | yes |
+| V2 | structured viability justification — ≥3 `viability_evidence` items covering build_tractable + coverage_gap + testability_tractable | `scout/verifier/plausibility.py` | yes |
+| **V2.5** | **adversarial evaluation** — a Challenger agent re-runs tools with different slices and files disputes against the Proposer's claims; a deterministic Judge rules each dispute. If any is `refuted`, viable_target is rejected. | `scout/adversarial.py`, `scout/verifier/adversarial_layer.py` | yes, when enabled |
+| V3 | **teacher semantic review** — escalation `kind="end_of_cycle_review"` at pre-finalize AND post-verifier-rejection | `scout/tools/scorecard_writer.py`, `scout/student.py::_post_verifier_review` | judgment |
+| V4 | stability probe — composite stdev < threshold over N runs | `scout evaluate --runs N` | yes |
+| V5 | canary regression — 5 reference repos still score in tolerance | (bead `ih2`) | yes, blocker |
+| V6 | **pilot run** — a separate general-purpose agent synthesises ONE passing test for a low-coverage class; did it compile+pass+cover? | `scripts/pilot.sh` + bead `uc6` | **empirical — this is the real signal** |
+| V7 | post-hoc — TestWright's actual delta vs scout's prediction | future | retrospective |
+
+### Adversarial evaluation (V2.5) in detail
+
+Three roles, orthogonal mandates:
+
+| Role | Mandate | Tools |
+|------|---------|-------|
+| **Proposer** | Build the draft scorecard; populate `viability_evidence` defending `viable_target=true`. (Today's student, role=`full` or swarm specialists.) | 9 tools (full SPEC §3.3 surface) |
+| **Challenger** | Assume the Proposer is wrong. Re-run `static_analysis` with a different module, `git_log_analyze` with a different window, `github_api_query` with different params. File `file_challenge` for material disagreements (≥25% count delta, density bucket flip, boolean flip, or missing evidence trail). | 6 tools: github_api_query, static_analysis, git_log_analyze, git_clone, file_challenge, finalize_challenge. No run_build/tests/coverage (Proposer artifacts are frozen), no escalate, no finalize_scorecard. |
+| **Judge** | Deterministic rules: agreed (match) → upheld; evidence cited + material delta → refuted; no counter-value → teacher_escalated; vibes → upheld with note. `passed = no refuted rulings`. | Reads `scorecard.json` + `challenge.json`, writes `viability_challenge.json`. Pure Python, no LLM (LLM judge tracked in bead `vb2`). |
+
+Activation: `SCOUT_ADVERSARIAL=1` or `scout evaluate --adversarial`.
+Artifacts emitted in the run dir: `challenge.json`, `viability_challenge.json`, `viability_challenge_passed` (flag file iff judge.passed).
+
+**Composition:** runs AFTER the Proposer calls `finalize_scorecard` and
+BEFORE the deterministic verifier. The verifier's Layer 2.5 then rejects
+any scorecard where `viable_target=true` but the challenge didn't pass.
+The teacher's post-verifier-review escalation sees the adversarial
+output too, so if the teacher overrides the judge it is an explicit,
+logged decision.
+
+**Rule:** the selection memo must NOT commit to a primary target until V0–V3 pass **and V6 (pilot) has ran successfully** on the candidate. V4–V5 are quality blockers for the harness itself, not the target. If you're writing a memo without V6, flag it explicitly with "pilot pending — not a final recommendation".
+
+## Teacher validation moments
+
+Three distinct windows where the teacher intervenes:
+
+1. **Mid-run impasse** — student calls `escalate` with a specific
+   failure kind (build_system, coverage_tool, bug_mining, structure,
+   timeout, other). Teacher replies via `resolutions.jsonl`.
+2. **Pre-finalize review** — `kind="end_of_cycle_review"` from
+   `finalize_scorecard`. Teacher sees the draft, replies `patch` (dotted
+   field paths → values merged into draft), `skip` (approve), `abort`,
+   or `restart`.
+3. **Post-verifier review** — when Layers 1–3 reject a scorecard, the
+   orchestrator emits another `end_of_cycle_review` outside the agent
+   loop. Teacher can `patch` (re-verified once), `skip` (acknowledge),
+   `abort` (delete), or `restart` (flag for rerun).
+
+Teacher-side helpers:
+
+- `scripts/review-packet.sh <run_dir>` — concentrates scorecard +
+  verifier + evidence + tool-trace tail + heartbeats into one markdown
+  file. Read it and decide in one pass.
+- `scripts/reply.sh <run_dir> <esc_id> <verdict> [notes]` — simple
+  skip/abort replies. For `patch` verdicts compose the JSON by hand.
+
 ## Observed weaknesses (update as new ones land)
 
 _Last updated: 2026-04-20, round 0 smoke test._
@@ -46,11 +109,11 @@ _Last updated: 2026-04-20, round 0 smoke test._
 - **gemini-2.5-flash-lite under-synthesizes tool outputs.** First
   end-to-end run populated every tool call successfully but left scorecard
   fields at defaults. Plausibility Layer caught the inconsistency
-  (`viable_target=true` with `clean_build_succeeded=false`). Likely fix
-  paths: (1) stronger model, (2) swarm mode with explicit field ownership,
-  (3) prompt rubric that forces the agent to echo every tool result into
-  the scorecard before calling `finalize_scorecard`. Track: will be a
-  finding promoted to a student-code edit once reproduced.
+  (`viable_target=true` with `clean_build_succeeded=false`). Round 1
+  countermeasures: added V2 (structured viability evidence) + V3
+  (pre-finalize + post-verifier teacher escalations) + hardened
+  `prompts.FULL_AGENT_INSTRUCTIONS`. If this persists, try swarm mode
+  (`SCOUT_SWARM_SIZE=4`) or a stronger model.
 - **Dry-run mode hides real signal.** `SCOUT_DRY_RUN=1` makes every
   build/test/coverage tool return a synthetic success. Good for smoke
   testing the agent loop, useless for real scoring. Real rounds require

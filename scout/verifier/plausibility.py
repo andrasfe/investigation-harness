@@ -31,6 +31,12 @@ def check_plausibility(s: Scorecard) -> tuple[bool, list[str]]:
     pr = s.tests.test_pass_rate
     if pr < 0.0 or pr > 1.0:
         issues.append(f"tests.test_pass_rate {pr} outside [0,1]")
+    # test_run_succeeded=true with test_count=0 is not "success"; it's "no tests ran"
+    if s.tests.test_run_succeeded and s.tests.test_count == 0:
+        issues.append("tests.test_run_succeeded=true but test_count=0 (no tests actually ran)")
+    # build_system="other" contradicts clean_build_succeeded=true
+    if s.build.clean_build_succeeded and s.build.build_system == "other":
+        issues.append("build.clean_build_succeeded=true but build_system='other' (run_build couldn't identify the system)")
 
     # coverage percentages
     for field_name, val in (
@@ -93,5 +99,25 @@ def check_plausibility(s: Scorecard) -> tuple[bool, list[str]]:
             issues.append("recommendation.viable_target=true requires clean_build_succeeded=true")
         if not s.tests.test_run_succeeded:
             issues.append("recommendation.viable_target=true requires tests.test_run_succeeded=true")
+        # V2: structured viability justification required.
+        ve = s.recommendation.viability_evidence or []
+        if len(ve) < 3:
+            issues.append(
+                f"recommendation.viable_target=true requires >=3 viability_evidence items; got {len(ve)}"
+            )
+        for i, item in enumerate(ve):
+            if not item.criterion:
+                issues.append(f"viability_evidence[{i}].criterion empty")
+            if not item.metric:
+                issues.append(f"viability_evidence[{i}].metric empty")
+            if item.observed_value is None and item.observed_value != 0:
+                issues.append(f"viability_evidence[{i}].observed_value missing (cite a real value)")
+        # At least one evidence item must be satisfied for each of the
+        # three core viability criteria: build_tractable, coverage_gap, testability_tractable.
+        seen = {item.criterion for item in ve if item.satisfied}
+        required = {"build_tractable", "coverage_gap", "testability_tractable"}
+        missing = required - seen
+        if missing:
+            issues.append(f"viability_evidence missing satisfied items for: {sorted(missing)}")
 
     return (len(issues) == 0, issues)

@@ -93,12 +93,77 @@ Phase H — Testability signals
 
 Phase I — Score and finalize
   Choose integer subscores 0–10 grounded in the evidence above. Set
-  recommendation.viable_target = true only if:
-    - clean_build_succeeded=true AND
-    - test_run_succeeded=true AND
-    - line coverage is below 80% (there IS a gap) AND
-    - escalation budget is not fully consumed.
-  Call finalize_scorecard with the complete object.
+  recommendation.viable_target = true ONLY IF all of:
+    - clean_build_succeeded=true
+    - test_run_succeeded=true
+    - line coverage is below 80% (there IS a gap)
+    - testability signals: at most one of reflection_density/static_state_density
+      is "high"
+    - escalation budget is not fully consumed
+  AND you populate recommendation.viability_evidence with at least 3 items,
+  each a dict shaped like:
+      {"criterion": "build_tractable" | "coverage_gap" |
+                    "testability_tractable" | "bug_corpus" | ...,
+       "metric": "<dotted scorecard path, e.g. build.clean_build_succeeded>",
+       "observed_value": <the actual number/string/bool observed>,
+       "threshold": "<human-readable, e.g. '<80%'>",
+       "satisfied": <bool>,
+       "rationale": "<one short sentence>"}
+  MUST include satisfied=true items for each of: build_tractable,
+  coverage_gap, testability_tractable. Otherwise set viable_target=false.
+
+  Also populate recommendation.pilot_result = {"ran": false} — scout
+  itself does not run the pilot; a separate agent fills this in later.
+
+  Call finalize_scorecard with the complete object. When the teacher
+  channel is active, the tool will escalate a pre-finalize review before
+  writing — honour any `patch` verdict by trusting the teacher's field
+  corrections (they are merged server-side).
+"""
+
+
+CHALLENGER_INSTRUCTIONS = """\
+You are Scout-Challenger, an ADVERSARIAL reviewer for the Proposer's draft
+scorecard. Your job is to REFUTE specific claims by re-running tools and
+comparing the counter-observation to the Proposer's written value.
+
+# Rules of engagement
+1. Read the DRAFT scorecard and the EVIDENCE MAP (both supplied in the
+   initial user message). Pick claims worth re-verifying — prioritize
+   recommendation.viable_target supporters (viability_evidence items),
+   testability_signals, and bug_history counts.
+2. For each re-verifiable claim you pick, call the appropriate tool with
+   a DIFFERENT slice than the Proposer used:
+     - `static_analysis` with a different `module`, or with a single metric
+       at a time to double-check density thresholds.
+     - `git_log_analyze` with a shorter `since` window (e.g. 6.months) or
+       a narrower pattern list to see if the result is stable.
+     - `github_api_query` to re-pull contributor/PR/release data.
+3. If your observation MATERIALLY disagrees with the Proposer's value,
+   call `file_challenge` with field_path, proposer_value, challenger_value,
+   rationale, evidence_tool, and confidence. A "material" disagreement is:
+     - a boolean flipping
+     - a density bucket changing (low↔medium, medium↔high)
+     - a count off by ≥25%
+     - a missing evidence trail (no tool call supports the claim)
+4. You MUST NOT re-run run_build, run_tests, or run_coverage; those are
+   frozen Proposer artifacts. You MUST NOT call finalize_scorecard.
+5. Keep your text outputs short. One challenge per claim. No prose.
+6. When you've exhausted defensible challenges — or after ~15 tool calls
+   — call `finalize_challenge` with a one-line summary. You MAY file zero
+   challenges; an honest "no_disputes_found" is a legitimate verdict.
+
+# What counts as a refutation
+- "Proposer says reflection_density=low; I re-ran static_analysis on
+  submodule `jsqlparser-core` and got 3.4 hits/file → high bucket" ✔ file
+- "Proposer says bug_fix_commits_24mo=126; I re-ran with --since=6.months
+  and got 14 → same trajectory, no dispute" ✗ do not file
+- "Proposer says notes='well-maintained'; I see 2 commits last 12mo" ✔
+  file as a challenge against maintainer_activity.commits_last_12mo IF
+  you actually re-queried the API and confirmed
+
+Do NOT file challenges based on opinion. Every challenge must cite a
+specific tool call and counter-observation.
 """
 
 
@@ -147,6 +212,8 @@ swarm_mode: {'single-agent' if config.swarm_size <= 1 else f'swarm[{role}]'}
 """
     if role == "full":
         return header + "\n" + FULL_AGENT_INSTRUCTIONS
+    if role == "challenger":
+        return header + "\n" + CHALLENGER_INSTRUCTIONS
     body = SPECIALIST_ROLES.get(role)
     if body is None:
         raise ValueError(f"unknown role {role!r}")

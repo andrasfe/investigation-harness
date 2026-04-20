@@ -18,6 +18,7 @@ from typing import Any, Callable
 from ..llm import ToolSpec
 from .bug_mining import TOOL_SPECS as BUG_MINING
 from .build import TOOL_SPECS as BUILD
+from .challenge_tools import TOOL_SPECS as CHALLENGE
 from .coverage import TOOL_SPECS as COVERAGE
 from .escalate_tool import TOOL_SPECS as ESCALATE
 from .git_ops import TOOL_SPECS as GIT
@@ -39,13 +40,32 @@ ALL_FACTORIES: tuple[ToolFactory, ...] = (
     GIT, BUILD, TESTS, COVERAGE, BUG_MINING, GH_API, STATIC, ESCALATE, SCORECARD,
 )
 
+# Challenger role (adversarial evaluation) — read-only re-verifiers plus the
+# two challenge-specific tools. NOT git_clone (workspace is already populated),
+# NOT run_build/run_tests/run_coverage (Proposer artifacts are frozen), NOT
+# finalize_scorecard or escalate (Proposer-only).
+CHALLENGER_FACTORIES: tuple[ToolFactory, ...] = (
+    GH_API, STATIC, BUG_MINING, GIT, CHALLENGE,
+)
 
-def build_toolset(ctx: AgentContext) -> list[ToolSpec]:
-    """Instantiate every tool against the current agent context."""
+
+def build_toolset(ctx: AgentContext, *, role: str = "proposer") -> list[ToolSpec]:
+    """Instantiate the tools available to a given role.
+
+    ``role='proposer'`` → full SPEC §3.3 surface.
+    ``role='challenger'`` → the read-only re-verification set plus
+    file_challenge + finalize_challenge.
+    """
+    factories = ALL_FACTORIES if role == "proposer" else CHALLENGER_FACTORIES
     tools: list[ToolSpec] = []
-    for factory in ALL_FACTORIES:
+    for factory in factories:
         tools.extend(factory(ctx))
-    # Enforce uniqueness — catches accidental name clashes between modules.
+    if role == "challenger":
+        # git_clone is idempotent and safe to expose (the workspace is shared);
+        # git_log_analyze re-read is genuinely useful for bug-mining challenges.
+        # Filter out tools a challenger shouldn't call even if inherited:
+        banned = {"run_build", "run_tests", "run_coverage", "escalate", "finalize_scorecard"}
+        tools = [t for t in tools if t.name not in banned]
     names = [t.name for t in tools]
     dupes = {n for n in names if names.count(n) > 1}
     if dupes:

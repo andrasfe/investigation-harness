@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from ..models import Scorecard
+from .adversarial_layer import check_adversarial
 from .plausibility import check_plausibility
 from .schema import check_schema
 from .trace import check_trace
@@ -95,6 +96,9 @@ def verify(run_dir: Path) -> VerifierReport:
 
     plaus_ok, plaus_issues = check_plausibility(scorecard)
     layers.append(LayerResult(name="plausibility", ok=plaus_ok, issues=plaus_issues))
+
+    adv_ok, adv_issues, adv_detail = check_adversarial(scorecard, run_dir)
+    layers.append(LayerResult(name="adversarial", ok=adv_ok, issues=adv_issues, details=adv_detail))
 
     trace_ok, trace_issues, trace_detail = check_trace(scorecard, run_dir)
     layers.append(LayerResult(name="trace", ok=trace_ok, issues=trace_issues, details=trace_detail))

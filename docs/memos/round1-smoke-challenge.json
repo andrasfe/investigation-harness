@@ -1,0 +1,28 @@
+{
+  "challenger_version": "5337765a41ba",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "evaluation_id": "scout-20260420-125254-JSqlParser",
+  "items": [
+    {
+      "ts": 1776714859.223445,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 0,
+      "challenger_value": 126,
+      "rationale": "Proposer wrote 0, but git_log_analyze returned 126 bug-fix commits in the last 24 months.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    },
+    {
+      "ts": 1776714859.2241879,
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 0,
+      "challenger_value": 100,
+      "rationale": "Proposer wrote 0, but github_api_query shows active commits as recently as April 2026.",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted claims of zero bug-fix commits and zero maintainer activity; the project is actively maintained with significant bug-fix history.",
+  "notes": ""
+}
