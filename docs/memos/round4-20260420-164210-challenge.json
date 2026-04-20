@@ -1,0 +1,19 @@
+{
+  "challenger_version": "91b3ff8b0347",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "evaluation_id": "round4-20260420-164210-JSqlParser",
+  "items": [
+    {
+      "ts": 1776728676.3490088,
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 0,
+      "challenger_value": 100,
+      "rationale": "The proposer claimed 0 commits in the last 12 months, but github_api_query shows recent activity (e.g., April 2026).",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted maintainer_activity claims; the repository is actively maintained.",
+  "notes": ""
+}

@@ -29,3 +29,10 @@
 - outcome: **verifier accepted=True (all 4 layers)**. Scorecard now has `build_system: maven`, `bug_fix_commits_24mo: 126`, correct `viable_target: false` in dry-run. Student correctly abstains from claiming viability when tools report synthetic success.
 - next: add dry-run detection + Apache project_handlers
 
+
+## 2026-04-20 — round 4 — repo_metadata field mapping added
+
+- pattern: round-3 scorecard had repo_metadata all-empty despite github_api_query returning stars=5942, license=Apache-2.0, etc.
+- edit: Phase B in prompts.py now explicitly maps each github_api_query response field to the scorecard path
+- outcome: **no measurable improvement**. LLM still writes empty strings. The hypothesis: tool results from Phase B age out of attention before the finalize call. Next round will try a pre-finalize inventory step.
+

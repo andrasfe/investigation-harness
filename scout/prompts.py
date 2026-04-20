@@ -100,9 +100,19 @@ Phase A — Clone
   Call git_clone with no args. Confirm the checkout_path exists.
 
 Phase B — Repo metadata
-  Call github_api_query on '/repos/{owner}/{repo}' once to gather stars,
-  license, last commit. Call '/repos/{owner}/{repo}/releases/latest' to
-  record last_release_date. If either returns 404, record null and continue.
+  Call github_api_query on '/repos/{owner}/{repo}' once. From `response.data`:
+    - `repo_metadata.name` ← `data.name`
+    - `repo_metadata.stars` ← `data.stargazers_count`
+    - `repo_metadata.primary_license` ← `data.license.spdx_id` (else "")
+    - `repo_metadata.last_commit_date` ← `data.pushed_at` (ISO 8601)
+  Then call '/repos/{owner}/{repo}/releases/latest':
+    - `maintainer_activity.last_release_date` ← `data.published_at` (or null on 404)
+  Then call '/repos/{owner}/{repo}/contributors?per_page=100':
+    - `maintainer_activity.distinct_committers_12mo` ← length of returned list
+      (approximation — SPEC allows it as a 12mo proxy).
+  Then call '/repos/{owner}/{repo}/commits?per_page=100' and count the returned
+  entries (cap at 100) to estimate `maintainer_activity.commits_last_12mo`.
+  Every one of these values MUST be copied from the tool result — never guess.
 
 Phase C — Build
   Call run_build (no args — auto-detect). If the build system is 'other',

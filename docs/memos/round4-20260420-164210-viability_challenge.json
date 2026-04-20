@@ -1,0 +1,18 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 1,
+  "rulings": [
+    {
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 0,
+      "challenger_value": 100,
+      "verdict": "refuted",
+      "rationale": "The proposer claimed 0 commits in the last 12 months, but github_api_query shows recent activity (e.g., April 2026).",
+      "confidence": "high",
+      "evidence_tool": "github_api_query"
+    }
+  ],
+  "passed": false,
+  "notes": "Refuted maintainer_activity claims; the repository is actively maintained."
+}
