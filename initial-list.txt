@@ -1,0 +1,36 @@
+Tier 1
+JSqlParser — https://github.com/JSQLParser/JSqlParser
+JavaParser — https://github.com/javaparser/javaparser
+Apache Commons Compress — https://github.com/apache/commons-compress
+Apache Commons Imaging — https://github.com/apache/commons-imaging
+JGraphT — https://github.com/jgrapht/jgrapht
+jsoup — https://github.com/jhy/jsoup
+univocity-parsers — https://github.com/uniVocity/univocity-parsers
+commonmark-java — https://github.com/commonmark/commonmark-java
+Pebble — https://github.com/PebbleTemplates/pebble
+
+RoaringBitmap — https://github.com/RoaringBitmap/RoaringBitmap
+Tier 2
+JsonPath — https://github.com/json-path/JsonPath
+ClassGraph — https://github.com/classgraph/classgraph
+java-diff-utils — https://github.com/java-diff-utils/java-diff-utils
+SnakeYAML — https://github.com/snakeyaml/snakeyaml
+SnakeYAML Engine — https://github.com/snakeyaml/snakeyaml-engine
+flexmark-java — https://github.com/vsch/flexmark-java
+Vavr — https://github.com/vavr-io/vavr
+iCal4j — https://github.com/ical4j/ical4j
+jte — https://github.com/casid/jte
+
+Handlebars.java — https://github.com/jknack/handlebars.java
+Tier 3
+jackson-dataformats-binary (CBOR module) — https://github.com/FasterXML/jackson-dataformats-binary
+jackson-dataformats-text (YAML module) — https://github.com/FasterXML/jackson-dataformats-text
+jackson-dataformats-text (CSV module) — https://github.com/FasterXML/jackson-dataformats-text
+jackson-dataformats-text (TOML module) — https://github.com/FasterXML/jackson-dataformats-text
+Apache Commons Geometry — https://github.com/apache/commons-geometry
+Apache Commons Numbers — https://github.com/apache/commons-numbers
+Apache Commons Statistics — https://github.com/apache/commons-statistics
+Apache Commons RNG — https://github.com/apache/commons-rng
+JLine 3 — https://github.com/jline/jline3
+
+ANTLR4 (Java runtime submodule) — https://github.com/antlr/antlr4

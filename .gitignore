@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+.env.local
+runs/
+state/*.jsonl
+!state/.keep
+canaries/*.json
+!canaries/.keep
+.DS_Store
+*.log
+.beads/*.db
