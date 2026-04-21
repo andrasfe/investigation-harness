@@ -45,3 +45,14 @@
 - outcome: **FIRST rich scorecard.** stars=5942 (was 0), Apache-2.0 license, real last_commit_date, maintainer commits=100, 5 sampled bug_fix commits with per-commit rationale, score subscores populated (composite=9.5), 3 viability_evidence items, useful notes text. Verifier accepts all 4 layers. Student still correctly declines viable=true because tests didn't run (dry-run).
 - next: pivot to multi-repo — rounds 6–10 will evaluate diverse repos from initial-list.txt to test whether improvements generalise beyond JSqlParser.
 
+
+## 2026-04-20 — round 6 — first multi-repo batch (5 Tier-1 repos)
+
+- first pivot: batch across JSqlParser, Commons Compress, Commons Imaging, JGraphT, jsoup (DRY_RUN + adversarial).
+- outcome: **1/5 accepted** (jsoup). Rejection reasons:
+  - 3/5: `maintainer_activity.last_release_date unparseable` — student writes the string "null" when github_api_query returns 404 on `/releases/latest`
+  - 3/5: `viable_target=true but test_run_succeeded=false` — LLM keeps claiming viability in dry-run despite prompt rule
+  - 1/5: jgrapht adversarial refutation on `bug_fix_commits_24mo` (challenger got 2 with standard patterns vs proposer's 4 — legitimate nuance)
+- also fixed: agent.py stagnation guard — halt after 3 turns with no new tool calls (the LLM otherwise loops on "unknown tool" for mis-spelled tool names).
+- next: round 7 adds structural auto-downgrade viable→false when test_count=0, and normalises missing dates to JSON null (not the string "null").
+

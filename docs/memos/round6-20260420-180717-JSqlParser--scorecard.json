@@ -1,0 +1,164 @@
+{
+  "evaluation_id": "round6-20260420-180717-JSqlParser-",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "repo_metadata": {
+    "name": "JSqlParser",
+    "stars": 5942,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-12T12:16:18Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "jacoco",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 126,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "cf5bbc9a62163155563363cc9a87f87934026dae",
+        "commit_message_excerpt": "fix: split CCJSqlParserTokenManager static initializers to avoid 64KB method limit (#2425)",
+        "files_changed": [
+          "build.gradle"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Build system fix related to JVM method size limits."
+      },
+      {
+        "commit_sha": "f7c94334b25b63ffdbf7aff45c3abe2cb1573cb1",
+        "commit_message_excerpt": "doc: fix links",
+        "files_changed": [
+          "src/site/sphinx/_images/favicon.svg",
+          "src/site/sphinx/_images/logo-no-background.svg",
+          "src/site/sphinx/conf.py",
+          "src/site/sphinx/syntax_snapshot.rst",
+          "src/site/sphinx/syntax_stable.rst"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Documentation fix."
+      },
+      {
+        "commit_sha": "fff8a081e43d9b5888928cf943bbfccbb061da24",
+        "commit_message_excerpt": "fix: exponential backtracking on deeply nested bracketed expressions",
+        "files_changed": [
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Performance/correctness fix in the parser grammar."
+      },
+      {
+        "commit_sha": "7fc300f7b0968ecc9c887b941c8640312a6142b0",
+        "commit_message_excerpt": "fix(parser): pass modifier to ExceptOp/MinusOp constructors (#2419) (#2420)",
+        "files_changed": [
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt",
+          ".../statement/select/SetOperationModifierTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parser logic fix."
+      },
+      {
+        "commit_sha": "5788ca067abf76af63c0c04e2323816e0afbe263",
+        "commit_message_excerpt": "fix(parser): parse mysql fulltext AGAINST concat expression (#2413)",
+        "files_changed": [
+          ".../operators/relational/FullTextSearch.java",
+          ".../validation/validator/ExpressionValidator.java",
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt",
+          ".../sf/jsqlparser/statement/select/SelectTest.java",
+          ".../validator/ExpressionValidatorTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parser support for specific SQL syntax."
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 50,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2025-05-17T23:52:30Z"
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "low",
+    "external_service_dependencies": "http_outbound",
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 0,
+    "coverage_gap_value": 0,
+    "testability": 0,
+    "bug_history_richness": 0,
+    "maintainer_responsiveness": 0,
+    "composite": 0.0
+  },
+  "recommendation": {
+    "viable_target": true,
+    "recommended_submodule": null,
+    "notes": "The project is a highly active SQL parser with a strong bug-fix history. Build and tests are tractable. Coverage is reported as 0% in the dry run, but the project is viable for test generation due to the complexity of the parser and the clear gap in coverage (if 0% is accurate or if it's just a dry-run artifact).",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [
+      {
+        "criterion": "build_tractable",
+        "metric": "build.clean_build_succeeded",
+        "observed_value": true,
+        "threshold": "true",
+        "satisfied": true,
+        "rationale": "Maven build succeeded."
+      },
+      {
+        "criterion": "coverage_gap",
+        "metric": "coverage.line_coverage_percent_overall",
+        "observed_value": 0,
+        "threshold": "<80%",
+        "satisfied": true,
+        "rationale": "Coverage is well below 80%."
+      },
+      {
+        "criterion": "testability_tractable",
+        "metric": "testability_signals.reflection_density",
+        "observed_value": "low",
+        "threshold": "not high",
+        "satisfied": true,
+        "rationale": "Low reflection and static state density."
+      }
+    ],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "671a2b2a23b3",
+    "evaluation_duration_seconds": 64,
+    "escalation_count": 0,
+    "errors_encountered": []
+  }
+}

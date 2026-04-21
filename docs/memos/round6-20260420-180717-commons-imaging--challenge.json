@@ -1,0 +1,19 @@
+{
+  "challenger_version": "671a2b2a23b3",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/apache/commons-imaging",
+  "evaluation_id": "round6-20260420-180717-commons-imaging-",
+  "items": [
+    {
+      "ts": 1776734042.3742201,
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 100,
+      "challenger_value": 1,
+      "rationale": "The proposer claimed 100 distinct committers in 12 months, but the commit history shows a very small number of active maintainers (e.g., Gary Gregory dominating recent commits). 100 is an impossibly high number for this project's scale.",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted maintainer_activity.distinct_committers_12mo as it was clearly an inflated or placeholder value.",
+  "notes": ""
+}
