@@ -1,0 +1,28 @@
+{
+  "challenger_version": "75f057f012ed",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/jgrapht/jgrapht",
+  "evaluation_id": "round10-20260420-192947-jgrapht-",
+  "items": [
+    {
+      "ts": 1776738853.2598789,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 4,
+      "challenger_value": 2,
+      "rationale": "Re-running git_log_analyze with standard bug-fix patterns over 24 months returned 2 commits, whereas the proposer claimed 4.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    },
+    {
+      "ts": 1776738853.2607412,
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 100,
+      "challenger_value": "null",
+      "rationale": "The proposer claimed 100 commits and 100 distinct committers in the last 12 months; however, a sample of recent commits shows a high proportion of dependabot bots, and 100 distinct committers for 100 commits is statistically improbable for this repo.",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Disputed bug fix count and maintainer activity metrics.",
+  "notes": ""
+}

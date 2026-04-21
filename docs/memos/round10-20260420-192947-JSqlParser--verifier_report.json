@@ -1,0 +1,57 @@
+{
+  "run_dir": "/Users/andraslferenczi/investigation-harness/runs/round10-20260420-192947-JSqlParser-",
+  "scorecard_path": "/Users/andraslferenczi/investigation-harness/runs/round10-20260420-192947-JSqlParser-/scorecard.json",
+  "accepted": true,
+  "layers": [
+    {
+      "name": "schema",
+      "ok": true,
+      "issues": [],
+      "details": {}
+    },
+    {
+      "name": "plausibility",
+      "ok": true,
+      "issues": [],
+      "details": {}
+    },
+    {
+      "name": "adversarial",
+      "ok": true,
+      "issues": [],
+      "details": {
+        "ran": true,
+        "passed": true,
+        "challenge_count": 0,
+        "refuted_fields": [],
+        "teacher_escalated_fields": []
+      }
+    },
+    {
+      "name": "trace",
+      "ok": true,
+      "issues": [],
+      "details": {
+        "tool_calls_in_trace": 15,
+        "distinct_tools": [
+          "git_clone",
+          "git_log_analyze",
+          "github_api_query",
+          "run_build",
+          "run_coverage",
+          "run_tests",
+          "static_analysis"
+        ],
+        "evidence_keys": [
+          "bug_history.bug_fix_commits_24mo",
+          "bug_history.sampled_bug_fixes",
+          "testability_signals.external_service_dependencies",
+          "testability_signals.filesystem_assumptions",
+          "testability_signals.reflection_density",
+          "testability_signals.static_state_density",
+          "testability_signals.thread_sleep_count"
+        ]
+      }
+    }
+  ]
+}

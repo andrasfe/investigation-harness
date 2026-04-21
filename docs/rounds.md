@@ -91,3 +91,33 @@
   * JSqlParser 7.65, commons-compress 7.55, commons-imaging 7.25, jsoup 6.45, jgrapht 6.30
 - first batch where every Tier-1 repo produced a verifier-accepted scorecard.
 
+
+## 2026-04-20 — round 10 — stable final batch + selection memo
+
+- outcome: **5/5 accepted, second consecutive clean batch**. Composites stable:
+  * JSqlParser 8.05 (↑ from 7.65)
+  * commons-compress 7.15 (↓ from 7.55 — normal LLM variance)
+  * commons-imaging 6.85 (↓ from 7.25)
+  * jsoup 6.45 (unchanged)
+  * jgrapht 6.30 (unchanged)
+- generated `docs/memos/selection-memo-round10.md` with ranked candidates.
+- regenerated `docs/trajectory.md` — per-round pass rate curve showing the round-3 breakthrough and the round-9 consolidation.
+- **primary recommendation (tentative)**: JSQLParser/JSqlParser.
+- **caveat**: all rows viable=False because DRY_RUN=1. A real round would install mvn+gradle and actually run builds/tests/coverage — scout's structure (verifier, adversarial, autofill) is now ready for that.
+
+### 10-round summary
+
+| round | what changed | acceptance |
+|-------|--------------|------------|
+| 0 | scaffold smoke | 0/1 |
+| 1 | adversarial + viability_evidence | 0/1 |
+| 2 | learning channels (rules/facts seed) | 1/1 |
+| **3** | **field-extraction table → first accept** | 1/1 |
+| 4 | Phase B mapping (null) | 1/1 |
+| **5** | **structural autofill → rich scorecard** | 1/1 |
+| 6 | first multi-repo batch | 1/5 |
+| 7 | dry-run viability downgrade + null date fix | 4/5 |
+| 8 | mechanical score subscore derivation | 3/5 (2 hangs) |
+| **9** | **max_tokens + minimal-finalize → all green** | 5/5 |
+| 10 | stability re-batch + selection memo | 5/5 |
+

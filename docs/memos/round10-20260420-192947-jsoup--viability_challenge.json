@@ -1,0 +1,18 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 1,
+  "rulings": [
+    {
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 25,
+      "challenger_value": 10,
+      "verdict": "refuted",
+      "rationale": "Re-running git_log_analyze with explicit bug-related patterns returned 10 commits, which is a 60% difference from the proposer's 25.",
+      "confidence": "high",
+      "evidence_tool": "git_log_analyze"
+    }
+  ],
+  "passed": false,
+  "notes": "Disputed bug_fix_commits_24mo; observed 10 vs proposer's 25. Other signals (static analysis) were consistent."
+}
