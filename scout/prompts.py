@@ -140,6 +140,33 @@ Phase G — Maintainer activity
 Phase H — Testability signals
   Call static_analysis(metric='all'). Use the returned buckets verbatim.
 
+Phase H.5 — Pre-finalize INVENTORY (MANDATORY, written as a normal text message, NOT a tool call)
+
+Before you call finalize_scorecard, emit ONE plain-text assistant message
+— no tool calls — that lists every scorecard field you will populate and
+the exact value you plan to use. Use this layout (fill in every value):
+
+  INVENTORY:
+  - repo_metadata.name = "<from github_api_query data.name>"
+  - repo_metadata.stars = <from data.stargazers_count>
+  - repo_metadata.primary_license = "<from data.license.spdx_id>"
+  - repo_metadata.last_commit_date = "<from data.pushed_at>"
+  - build.build_system = "<from run_build.build_system>"
+  - build.clean_build_succeeded = <from run_build.clean_build_succeeded>
+  - tests.test_count = <from run_tests.test_count>
+  - tests.test_run_succeeded = <from run_tests.test_run_succeeded>
+  - coverage.line_coverage_percent_overall = <from run_coverage.line_coverage_percent_overall>
+  - bug_history.bug_fix_commits_24mo = <from git_log_analyze.bug_fix_commit_count>
+  - maintainer_activity.distinct_committers_12mo = <length of contributors list>
+  - maintainer_activity.commits_last_12mo = <length of commits list>
+  - maintainer_activity.last_release_date = "<from releases/latest data.published_at>"
+  - testability_signals.* = <from static_analysis result>
+  - score.build_tractability..maintainer_responsiveness = <integers 0-10>
+
+If you cannot find a value in the trace, write `MISSING` — do NOT invent.
+Then on the NEXT assistant turn call finalize_scorecard populating each
+scorecard field with the exact value you committed to in the INVENTORY.
+
 Phase I — Score and finalize
   Choose integer subscores 0–10 grounded in the evidence above. Set
   recommendation.viable_target = true ONLY IF all of:

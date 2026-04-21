@@ -36,3 +36,12 @@
 - edit: Phase B in prompts.py now explicitly maps each github_api_query response field to the scorecard path
 - outcome: **no measurable improvement**. LLM still writes empty strings. The hypothesis: tool results from Phase B age out of attention before the finalize call. Next round will try a pre-finalize inventory step.
 
+
+## 2026-04-20 — round 5 — structural autofill from trace
+
+- pattern: rounds 3–4 showed the weak LLM doesn't re-read tool results when composing the final scorecard. Prompt-only fixes plateaued.
+- edit: added `_autofill_from_trace` in `scout/tools/scorecard_writer.py` — when the student passes a scorecard with default values for a field that a tool result populated, autofill from the trace. Never overwrites non-default student values. Autofilled paths written to a sidecar `autofilled_fields.json`.
+- also fixed: autofill's test_run_succeeded now requires test_count>0 (dry-run run_tests returns ok=true with 0 tests).
+- outcome: **FIRST rich scorecard.** stars=5942 (was 0), Apache-2.0 license, real last_commit_date, maintainer commits=100, 5 sampled bug_fix commits with per-commit rationale, score subscores populated (composite=9.5), 3 viability_evidence items, useful notes text. Verifier accepts all 4 layers. Student still correctly declines viable=true because tests didn't run (dry-run).
+- next: pivot to multi-repo — rounds 6–10 will evaluate diverse repos from initial-list.txt to test whether improvements generalise beyond JSqlParser.
+

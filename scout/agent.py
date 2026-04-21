@@ -159,12 +159,30 @@ def run_agent(
             run.raw_messages.append(assistant.raw)
 
             if not assistant.tool_calls:
-                # Plain-text final response — treat as halt. The scorecard
-                # should have been written via finalize_scorecard; if not,
-                # the verifier will reject this run.
-                run.halt_reason = "no_tool_calls"
-                log.info("agent[%s]: halted (no tool calls). text=%s", role, assistant.content[:200])
-                break
+                # Plain-text assistant message. The Proposer may legitimately
+                # use this to emit an INVENTORY (Phase H.5). We tolerate one
+                # tool-less turn per nudge cycle; two consecutive halts the run.
+                consecutive_empty = getattr(run, "_consecutive_empty", 0) + 1
+                run._consecutive_empty = consecutive_empty  # type: ignore[attr-defined]
+                if consecutive_empty >= 2:
+                    run.halt_reason = "no_tool_calls_2x"
+                    log.info("agent[%s]: halted (2 no-tool turns). last text=%s",
+                             role, assistant.content[:200])
+                    break
+                log.info("agent[%s]: no-tool turn (text=%.60s...); nudging to continue",
+                         role, assistant.content or "")
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "Acknowledged. Continue: when you have completed the INVENTORY "
+                        "(if in Phase H.5) or are ready to submit, call finalize_scorecard "
+                        "with the full scorecard object. If your work is done, that IS the "
+                        "next step — do not stop."
+                    ),
+                })
+                continue
+            # Reset the consecutive-empty counter once we see tool calls again.
+            run._consecutive_empty = 0  # type: ignore[attr-defined]
 
             # Execute every tool the assistant requested this turn.
             if run.tool_calls_made + len(assistant.tool_calls) > ctx.config.llm.max_tool_calls:

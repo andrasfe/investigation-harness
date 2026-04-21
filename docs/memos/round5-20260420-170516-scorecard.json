@@ -1,0 +1,164 @@
+{
+  "evaluation_id": "round5-20260420-170516-JSqlParser",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "repo_metadata": {
+    "name": "JSqlParser",
+    "stars": 5942,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-12T12:16:18Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "jacoco",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 126,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "cf5bbc9a62163155563363cc9a87f87934026dae",
+        "commit_message_excerpt": "fix: split CCJSqlParserTokenManager static initializers to avoid 64KB method limit (#2425)",
+        "files_changed": [
+          "build.gradle"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Build system fix, not a logic bug."
+      },
+      {
+        "commit_sha": "fff8a081e43d9b5888928cf943bbfccbb061da24",
+        "commit_message_excerpt": "fix: exponential backtracking on deeply nested bracketed expressions",
+        "files_changed": [
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Performance/correctness bug in parser logic."
+      },
+      {
+        "commit_sha": "7fc300f7b0968ecc9c887b941c8640312a6142b0",
+        "commit_message_excerpt": "fix(parser): pass modifier to ExceptOp/MinusOp constructors (#2419) (#2420)",
+        "files_changed": [
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt",
+          ".../statement/select/SetOperationModifierTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Logic bug in AST construction."
+      },
+      {
+        "commit_sha": "5788ca067abf76af63c0c04e2323816e0afbe263",
+        "commit_message_excerpt": "fix(parser): parse mysql fulltext AGAINST concat expression (#2413)",
+        "files_changed": [
+          ".../operators/relational/FullTextSearch.java",
+          ".../validation/validator/ExpressionValidator.java",
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt",
+          ".../sf/jsqlparser/statement/select/SelectTest.java",
+          ".../validator/ExpressionValidatorTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parsing failure for specific SQL syntax."
+      },
+      {
+        "commit_sha": "c5b85abffdb00ae1f2f8319273dc7572f16846e0",
+        "commit_message_excerpt": "Fix dollar-quoted CREATE FUNCTION statement splitting (#2410)",
+        "files_changed": [
+          ".../net/sf/jsqlparser/parser/JSqlParserCC.jjt",
+          ".../sf/jsqlparser/expression/StringValueTest.java",
+          ".../create/CreateFunctionalStatementTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parsing failure for specific SQL syntax."
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 12,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2025-05-17T23:52:30Z"
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "low",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 10,
+    "coverage_gap_value": 10,
+    "testability": 9,
+    "bug_history_richness": 10,
+    "maintainer_responsiveness": 8,
+    "composite": 9.5
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "The project is a highly active SQL parser with a rich bug history and clean build. However, the test run returned 0 tests in the dry run environment, and coverage is 0. This suggests the test harness needs to be properly configured or the project uses a non-standard test layout, but the project itself is a prime candidate for agentic test generation due to the complexity of SQL parsing.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [
+      {
+        "criterion": "build_tractable",
+        "metric": "build.clean_build_succeeded",
+        "observed_value": true,
+        "threshold": "true",
+        "satisfied": true,
+        "rationale": "Build succeeded."
+      },
+      {
+        "criterion": "coverage_gap",
+        "metric": "coverage.line_coverage_percent_overall",
+        "observed_value": 0,
+        "threshold": "<80%",
+        "satisfied": true,
+        "rationale": "Coverage is well below 80%."
+      },
+      {
+        "criterion": "testability_tractable",
+        "metric": "testability_signals.reflection_density",
+        "observed_value": "low",
+        "threshold": "low/medium",
+        "satisfied": true,
+        "rationale": "Low reflection density."
+      }
+    ],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "448e0ea0dbef",
+    "evaluation_duration_seconds": 78,
+    "escalation_count": 0,
+    "errors_encountered": []
+  }
+}

@@ -62,6 +62,157 @@ def _pre_verify_summary(sc: Scorecard) -> dict[str, Any]:
     return {"likely_rejection_reasons": issues}
 
 
+def _autofill_from_trace(draft: dict[str, Any], ctx: AgentContext) -> tuple[dict[str, Any], list[str]]:
+    """Auto-fill scorecard fields from the tool trace when the student left
+    them at defaults.
+
+    The weak student LLM sometimes forgets to echo a tool result into the
+    scorecard. Rather than fail the run, we walk the agent_trace and, for
+    every observed tool result, set the matching scorecard field IF AND
+    ONLY IF the current draft has the default value (0, 0.0, "", False).
+    We never overwrite a non-default value the student chose deliberately.
+
+    Filled-in paths are recorded in metadata.autofilled_fields for audit.
+    """
+    filled: list[str] = []
+
+    def _get(d: dict[str, Any], path: list[str]) -> Any:
+        cur = d
+        for p in path:
+            if not isinstance(cur, dict):
+                return None
+            cur = cur.get(p)
+        return cur
+
+    def _set(d: dict[str, Any], path: list[str], value: Any) -> bool:
+        cur = d
+        for p in path[:-1]:
+            cur = cur.setdefault(p, {})
+            if not isinstance(cur, dict):
+                return False
+        cur[path[-1]] = value
+        return True
+
+    def _is_default(v: Any) -> bool:
+        if v is None: return True
+        if isinstance(v, bool): return v is False
+        if isinstance(v, (int, float)): return v == 0
+        if isinstance(v, str): return v == ""
+        if isinstance(v, list): return len(v) == 0
+        return False
+
+    # Walk the raw tool trace and extract data the student may have dropped.
+    github_repo_data: dict[str, Any] = {}
+    github_releases: dict[str, Any] = {}
+    contributors_len = None
+    commits_len = None
+    for entry in ctx.tool_trace:
+        tool = entry.get("tool")
+        r = entry.get("result") or {}
+        if not r.get("ok"): continue
+        if tool == "run_build":
+            for fp, tk in (
+                ("build.build_system", "build_system"),
+                ("build.clean_build_succeeded", "clean_build_succeeded"),
+                ("build.clean_build_time_seconds", "clean_build_time_seconds"),
+            ):
+                if tk in r and _is_default(_get(draft, fp.split("."))):
+                    if _set(draft, fp.split("."), r[tk]): filled.append(fp)
+        elif tool == "run_tests":
+            # Copy count / rate / time first.
+            for fp, tk in (
+                ("tests.test_count", "test_count"),
+                ("tests.test_pass_rate", "test_pass_rate"),
+                ("tests.test_run_time_seconds", "test_run_time_seconds"),
+            ):
+                if tk in r and _is_default(_get(draft, fp.split("."))):
+                    if _set(draft, fp.split("."), r[tk]): filled.append(fp)
+            # test_run_succeeded is only true when the tool ran AND produced
+            # a non-zero test count. Matches the plausibility rule: "succeeded
+            # with zero tests is not success". Covers the dry-run case where
+            # run_tests stubs ok=true but test_count=0.
+            if _is_default(_get(draft, ["tests", "test_run_succeeded"])):
+                test_count = int(_get(draft, ["tests", "test_count"]) or 0)
+                consistent = bool(r.get("test_run_succeeded")) and test_count > 0
+                if _set(draft, ["tests", "test_run_succeeded"], consistent):
+                    filled.append("tests.test_run_succeeded")
+        elif tool == "run_coverage":
+            for fp, tk in (
+                ("coverage.tool_used", "tool_used"),
+                ("coverage.line_coverage_percent_overall", "line_coverage_percent_overall"),
+                ("coverage.branch_coverage_percent_overall", "branch_coverage_percent_overall"),
+                ("coverage.per_module_coverage", "per_module_coverage"),
+            ):
+                if tk in r and _is_default(_get(draft, fp.split("."))):
+                    if _set(draft, fp.split("."), r[tk]): filled.append(fp)
+        elif tool == "git_log_analyze":
+            if _is_default(_get(draft, ["bug_history", "bug_fix_commits_24mo"])) and "bug_fix_commit_count" in r:
+                _set(draft, ["bug_history", "bug_fix_commits_24mo"], r["bug_fix_commit_count"])
+                filled.append("bug_history.bug_fix_commits_24mo")
+            if _is_default(_get(draft, ["bug_history", "sampled_bug_fixes"])) and r.get("sampled"):
+                transformed = []
+                for s in r["sampled"]:
+                    transformed.append({
+                        "commit_sha": s.get("sha", ""),
+                        "commit_message_excerpt": (s.get("subject") or "")[:200],
+                        "files_changed": s.get("files_changed", [])[:10],
+                        "plausibly_test_catchable": True,  # heuristic default — student can override
+                        "rationale": "auto-extracted from git_log_analyze",
+                    })
+                _set(draft, ["bug_history", "sampled_bug_fixes"], transformed)
+                filled.append("bug_history.sampled_bug_fixes")
+        elif tool == "static_analysis":
+            for fp, tk in (
+                ("testability_signals.reflection_density", "reflection_density"),
+                ("testability_signals.static_state_density", "static_state_density"),
+                ("testability_signals.filesystem_assumptions", "filesystem_assumptions"),
+                ("testability_signals.thread_sleep_count", "thread_sleep_count"),
+                ("testability_signals.external_service_dependencies", "external_service_dependencies"),
+            ):
+                if tk in r and _is_default(_get(draft, fp.split("."))):
+                    if _set(draft, fp.split("."), r[tk]): filled.append(fp)
+        elif tool == "github_api_query":
+            endpoint = (entry.get("args") or {}).get("endpoint", "")
+            data = r.get("data")
+            if endpoint.endswith("}") and isinstance(data, dict):
+                # /repos/{owner}/{repo}
+                github_repo_data = data
+            elif endpoint.endswith("/releases/latest") and isinstance(data, dict):
+                github_releases = data
+            elif "/contributors" in endpoint and isinstance(data, list):
+                contributors_len = len(data)
+            elif "/commits" in endpoint and isinstance(data, list):
+                # take the last /commits list we see
+                commits_len = len(data)
+
+    # Apply github-derived metadata.
+    if github_repo_data:
+        if _is_default(_get(draft, ["repo_metadata", "name"])):
+            _set(draft, ["repo_metadata", "name"], github_repo_data.get("name", ""))
+            filled.append("repo_metadata.name")
+        if _is_default(_get(draft, ["repo_metadata", "stars"])):
+            _set(draft, ["repo_metadata", "stars"], int(github_repo_data.get("stargazers_count", 0) or 0))
+            filled.append("repo_metadata.stars")
+        if _is_default(_get(draft, ["repo_metadata", "primary_license"])):
+            lic = (github_repo_data.get("license") or {}).get("spdx_id") or ""
+            _set(draft, ["repo_metadata", "primary_license"], lic)
+            filled.append("repo_metadata.primary_license")
+        if _is_default(_get(draft, ["repo_metadata", "last_commit_date"])):
+            _set(draft, ["repo_metadata", "last_commit_date"], github_repo_data.get("pushed_at", ""))
+            filled.append("repo_metadata.last_commit_date")
+    if github_releases and _get(draft, ["maintainer_activity", "last_release_date"]) is None:
+        _set(draft, ["maintainer_activity", "last_release_date"], github_releases.get("published_at"))
+        filled.append("maintainer_activity.last_release_date")
+    if contributors_len is not None and _is_default(_get(draft, ["maintainer_activity", "distinct_committers_12mo"])):
+        _set(draft, ["maintainer_activity", "distinct_committers_12mo"], contributors_len)
+        filled.append("maintainer_activity.distinct_committers_12mo")
+    if commits_len is not None and _is_default(_get(draft, ["maintainer_activity", "commits_last_12mo"])):
+        _set(draft, ["maintainer_activity", "commits_last_12mo"], commits_len)
+        filled.append("maintainer_activity.commits_last_12mo")
+
+    return draft, filled
+
+
 def _apply_patch(draft: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
     """Merge a teacher patch into the draft scorecard.
 
@@ -101,6 +252,25 @@ def _make_finalize(ctx: AgentContext):
         md.setdefault("errors_encountered", list(ctx.errors))
         md.setdefault("evaluation_duration_seconds", 0)
         scorecard_dict["metadata"] = md
+
+        # Auto-fill any scorecard fields the student left at defaults from
+        # the tool trace. Safety net for the weak-LLM synthesis gap observed
+        # in rounds 0-4. Never overwrites a non-default value the student set.
+        # The list of autofilled paths is written to a sidecar file rather
+        # than the scorecard's metadata block, because the Scorecard
+        # dataclass schema is prohibited from accepting new fields.
+        scorecard_dict, autofilled = _autofill_from_trace(scorecard_dict, ctx)
+        if autofilled:
+            log.info("finalize: autofilled %d field(s) from trace: %s",
+                     len(autofilled), autofilled)
+            sidecar = ctx.config.run_dir / "autofilled_fields.json"
+            try:
+                sidecar.write_text(
+                    json.dumps({"autofilled_fields": sorted(set(autofilled))}, indent=2),
+                    encoding="utf-8",
+                )
+            except OSError as exc:
+                log.warning("finalize: failed to write autofill sidecar: %s", exc)
 
         try:
             draft_scorecard = Scorecard.from_dict(scorecard_dict)
