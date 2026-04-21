@@ -67,3 +67,16 @@
 - outcome: **4/5 accepted** (commons-compress stagnated on turn 9 after 3 turns of no new tool calls — the stagnation guard cleanly aborted a pathological loop). JSqlParser, commons-imaging, jgrapht, jsoup all verifier-accepted.
 - remaining gap: composite=0.0 for every repo — the LLM isn't populating score subscores. Round 8 will derive them mechanically from evidence.
 
+
+## 2026-04-20 — round 8 — mechanical score subscore derivation
+
+- pattern observed in round 7: every accepted scorecard had composite=0.0 because the LLM never populated the 5 subscores
+- edit in `scout/tools/scorecard_writer.py` autofill: when all 5 subscores are 0, derive them heuristically from evidence:
+  * `build_tractability`: from build success + build time bucket (fast→10, slow→4, dry-run→8)
+  * `coverage_gap_value`: from line coverage (0% → 5 in dry-run, <40% → 10, >85% → 2)
+  * `testability`: 10 minus penalties for high reflection/static-state density, external deps, thread_sleep > 20
+  * `bug_history_richness`: from bug_fix_commits_24mo (0 → 0, 126 → 10)
+  * `maintainer_responsiveness`: commits+committers+release activity
+- outcome: **3/5 accepted** (JSqlParser composite 7.75, commons-imaging 6.85, jgrapht 6.3, all non-zero and differentiated). commons-compress stagnated (same as round 7). jsoup hung mid-run — LLM appears to loop silently without triggering stagnation; tracked for round 9 diagnosis.
+- net progress: first round producing **ranked candidates with meaningful composites**.
+

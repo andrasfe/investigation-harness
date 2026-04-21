@@ -270,6 +270,94 @@ def _make_finalize(ctx: AgentContext):
         # dataclass schema is prohibited from accepting new fields.
         scorecard_dict, autofilled = _autofill_from_trace(scorecard_dict, ctx)
 
+        # Mechanical score derivation (round-8 from observed round-7 gap):
+        # the weak LLM ships composite=0.0 because it never picks subscores.
+        # Derive each 0-10 subscore from evidence-grounded heuristics. Only
+        # runs when the student left score at defaults.
+        score = scorecard_dict.setdefault("score", {})
+        if all(int(score.get(k, 0) or 0) == 0 for k in
+               ("build_tractability", "coverage_gap_value", "testability",
+                "bug_history_richness", "maintainer_responsiveness")):
+            b = scorecard_dict.get("build", {}) or {}
+            t = scorecard_dict.get("tests", {}) or {}
+            c = scorecard_dict.get("coverage", {}) or {}
+            bh = scorecard_dict.get("bug_history", {}) or {}
+            ma = scorecard_dict.get("maintainer_activity", {}) or {}
+            ts = scorecard_dict.get("testability_signals", {}) or {}
+
+            # build_tractability: 0 if build failed; else scale by build time
+            # (fast=10, slow=5). In dry-run everything is 0s so we cap at 8
+            # to signal "we think it builds but haven't observed a real one".
+            if not b.get("clean_build_succeeded"):
+                score["build_tractability"] = 0
+            else:
+                secs = int(b.get("clean_build_time_seconds", 0) or 0)
+                if secs == 0:
+                    score["build_tractability"] = 8  # dry-run / unknown duration
+                elif secs <= 60:
+                    score["build_tractability"] = 10
+                elif secs <= 300:
+                    score["build_tractability"] = 8
+                elif secs <= 900:
+                    score["build_tractability"] = 6
+                else:
+                    score["build_tractability"] = 4
+
+            # coverage_gap_value: bigger gap = higher value. Default to 5 in
+            # dry-run (we can't observe real coverage) to avoid claiming we
+            # know the opportunity size. Only score higher if a real coverage
+            # number was observed.
+            lc = float(c.get("line_coverage_percent_overall", 0.0) or 0.0)
+            if lc <= 0:
+                score["coverage_gap_value"] = 5
+            elif lc < 40:
+                score["coverage_gap_value"] = 10
+            elif lc < 60:
+                score["coverage_gap_value"] = 9
+            elif lc < 75:
+                score["coverage_gap_value"] = 7
+            elif lc < 85:
+                score["coverage_gap_value"] = 5
+            else:
+                score["coverage_gap_value"] = 2  # already well covered
+
+            # testability: penalise high reflection / static-state / filesystem
+            bad = sum(1 for k in ("reflection_density", "static_state_density",
+                                  "filesystem_assumptions") if ts.get(k) == "high")
+            mid = sum(1 for k in ("reflection_density", "static_state_density",
+                                  "filesystem_assumptions") if ts.get(k) == "medium")
+            external = len(ts.get("external_service_dependencies") or [])
+            sleeps = int(ts.get("thread_sleep_count", 0) or 0)
+            testability = 10 - (bad * 3) - (mid * 1) - min(external, 3) - (2 if sleeps > 20 else 0)
+            score["testability"] = max(0, min(10, testability))
+
+            # bug_history_richness: map bug_fix_commits_24mo to 0-10
+            n = int(bh.get("bug_fix_commits_24mo", 0) or 0)
+            if n <= 0:
+                score["bug_history_richness"] = 0
+            elif n < 10:
+                score["bug_history_richness"] = 3
+            elif n < 30:
+                score["bug_history_richness"] = 6
+            elif n < 80:
+                score["bug_history_richness"] = 8
+            else:
+                score["bug_history_richness"] = 10
+
+            # maintainer_responsiveness: commits/committers in the last 12mo
+            commits = int(ma.get("commits_last_12mo", 0) or 0)
+            cmtrs = int(ma.get("distinct_committers_12mo", 0) or 0)
+            mr = 0
+            if commits >= 100: mr += 5
+            elif commits >= 30: mr += 3
+            elif commits >= 10: mr += 2
+            if cmtrs >= 10: mr += 3
+            elif cmtrs >= 3: mr += 2
+            elif cmtrs >= 1: mr += 1
+            if ma.get("last_release_date"): mr += 2
+            score["maintainer_responsiveness"] = min(10, mr)
+            autofilled.append("score.mechanically_derived")
+
         # Mechanical viability downgrade (round-7 from observed round-6 failures):
         # if tests didn't actually run (test_count=0) OR the build didn't
         # succeed, recommendation.viable_target MUST be false. The weak LLM
