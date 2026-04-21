@@ -1,0 +1,188 @@
+{
+  "evaluation_id": "round7-20260420-182030-jsoup-",
+  "repo_url": "https://github.com/jhy/jsoup",
+  "repo_metadata": {
+    "name": "jsoup",
+    "stars": 11359,
+    "downloads_last_12mo": null,
+    "primary_license": "MIT",
+    "last_commit_date": "2026-04-20T06:31:22Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1.0,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 25,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "c1d08123de2945d80fd479bbad42973ce5b10188",
+        "commit_message_excerpt": "Update CHANGES.md for NodeTraversor fixes",
+        "files_changed": [
+          "CHANGES.md"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Documentation update."
+      },
+      {
+        "commit_sha": "62bec31856454d2826eae584613b9d6591224ad0",
+        "commit_message_excerpt": "Typo fix",
+        "files_changed": [
+          "CHANGES.md"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Documentation update."
+      },
+      {
+        "commit_sha": "6bef9383f7d09023675c31acab433c58bc025084",
+        "commit_message_excerpt": "Fix parsing of SVG foreignObject in paragraphs",
+        "files_changed": [
+          "CHANGES.md",
+          "src/main/java/org/jsoup/parser/HtmlTreeBuilder.java",
+          "src/test/java/org/jsoup/parser/HtmlParserTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parsing logic fix with accompanying test."
+      },
+      {
+        "commit_sha": "bcbac427ff4bca1748f8eb5125a23d4c739b75e9",
+        "commit_message_excerpt": "Fix #2422 - Cloned Parser does not reuse TagSet from original (#2423)",
+        "files_changed": [
+          "CHANGES.md",
+          "src/main/java/org/jsoup/parser/Parser.java",
+          "src/main/java/org/jsoup/parser/TagSet.java",
+          "src/test/java/org/jsoup/parser/ParserTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Logic fix with accompanying test."
+      },
+      {
+        "commit_sha": "c4bf5ba304aa1bcdb8ddd5f853ab18c9edd3be5b",
+        "commit_message_excerpt": "Fix IOOB on crafted fragment input",
+        "files_changed": [
+          "CHANGES.md",
+          "src/main/java/org/jsoup/parser/HtmlTreeBuilderState.java",
+          "src/test/java/org/jsoup/integration/FuzzFixesTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "IndexOutOfBoundsException fix with accompanying test."
+      },
+      {
+        "commit_sha": "eb8410e4ec01827a31acc8a9dd83f761054175e2",
+        "commit_message_excerpt": "Correct the fixed version of #2374",
+        "files_changed": [
+          "CHANGES.md"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Documentation update."
+      },
+      {
+        "commit_sha": "3941022e5c710392c6bd9f0fe8cce69f9caa08ef",
+        "commit_message_excerpt": "Fix: Use system default ProxySelector in HttpClient #2388 (#2390)",
+        "files_changed": [
+          "CHANGES.md",
+          ".../org/jsoup/helper/HttpClientExecutor.java",
+          ".../org/jsoup/helper/HttpClientExecutorTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Network logic fix with accompanying test."
+      },
+      {
+        "commit_sha": "71f963ea3a78746fc2a3ba80b2843254b35c211a",
+        "commit_message_excerpt": "Fix for HTML that breaks the select scope",
+        "files_changed": [
+          "src/main/java/org/jsoup/parser/HtmlTreeBuilder.java",
+          "src/test/resources/fuzztests/ex-inselect16.html"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "Parsing fix with accompanying test resource."
+      },
+      {
+        "commit_sha": "3a9a6c7c8a67d51ebbb598495496e28dcd0c18e1",
+        "commit_message_excerpt": "Fix ProxyTest in CI",
+        "files_changed": [
+          "src/test/java/org/jsoup/integration/ProxyTest.java"
+        ],
+        "plausibly_test_catchable": false,
+        "rationale": "Test-only fix."
+      },
+      {
+        "commit_sha": "342e6a0db5768642e8d3dd1c212384e0020403f7",
+        "commit_message_excerpt": "Fix a IOOB for mangled adoption",
+        "files_changed": [
+          "src/main/java/org/jsoup/parser/HtmlTreeBuilder.java",
+          "src/test/resources/fuzztests/9056.html.gz"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "IndexOutOfBoundsException fix with accompanying test resource."
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 50,
+    "distinct_committers_12mo": 50,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2026-04-20T06:55:32Z"
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "high",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 0,
+    "coverage_gap_value": 0,
+    "testability": 0,
+    "bug_history_richness": 0,
+    "maintainer_responsiveness": 0,
+    "composite": 0.0
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "81b65590ded9",
+    "evaluation_duration_seconds": 210,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

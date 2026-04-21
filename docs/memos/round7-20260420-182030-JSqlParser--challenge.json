@@ -1,0 +1,19 @@
+{
+  "challenger_version": "81b65590ded9",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/JSQLParser/JSqlParser",
+  "evaluation_id": "round7-20260420-182030-JSqlParser-",
+  "items": [
+    {
+      "ts": 1776734583.2952309,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 126,
+      "challenger_value": 107,
+      "rationale": "Re-running git_log_analyze with the same 24-month window and standard bug-fix patterns returned 107 commits, which is a material difference (>25%) from the proposer's 126.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Disputed bug_fix_commits_24mo count based on re-run of git_log_analyze.",
+  "notes": ""
+}

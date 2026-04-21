@@ -1,0 +1,28 @@
+{
+  "challenger_version": "81b65590ded9",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/jhy/jsoup",
+  "evaluation_id": "round7-20260420-182030-jsoup-",
+  "items": [
+    {
+      "ts": 1776735753.978505,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 25,
+      "challenger_value": 10,
+      "rationale": "Re-running git_log_analyze with standard bug-fix patterns returned 10 commits, which is a >25% difference from the proposer's 25.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    },
+    {
+      "ts": 1776735753.9792378,
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 50,
+      "challenger_value": 1,
+      "rationale": "The commit history shows the project is primarily maintained by a single person (jhy), making the claim of 50 distinct committers in 12 months highly improbable.",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted bug_fix_commits_24mo and distinct_committers_12mo based on tool re-runs.",
+  "notes": ""
+}

@@ -56,3 +56,14 @@
 - also fixed: agent.py stagnation guard — halt after 3 turns with no new tool calls (the LLM otherwise loops on "unknown tool" for mis-spelled tool names).
 - next: round 7 adds structural auto-downgrade viable→false when test_count=0, and normalises missing dates to JSON null (not the string "null").
 
+
+## 2026-04-20 — round 7 — dry-run viability downgrade + null-date normalisation
+
+- pattern observed in round 6: 3/5 rejected on "viable=true with test_count=0" and "last_release_date unparseable (string 'null')"
+- structural edits to `scout/tools/scorecard_writer.py`:
+  * auto-downgrade `recommendation.viable_target=false` when build didn't succeed OR test_count==0 (dry-run guard)
+  * normalise string "null"/"none"/""  in `last_release_date` to JSON null; copy real dates from `/releases/latest data.published_at` only when present
+- also: `scout/verifier/plausibility.py` tolerates "null"/"none" strings as legitimate absent
+- outcome: **4/5 accepted** (commons-compress stagnated on turn 9 after 3 turns of no new tool calls — the stagnation guard cleanly aborted a pathological loop). JSqlParser, commons-imaging, jgrapht, jsoup all verifier-accepted.
+- remaining gap: composite=0.0 for every repo — the LLM isn't populating score subscores. Round 8 will derive them mechanically from evidence.
+

@@ -73,11 +73,19 @@ def check_plausibility(s: Scorecard) -> tuple[bool, list[str]]:
             issues.append(f"repo_metadata.last_commit_date {d} is in the future")
 
     if s.maintainer_activity.last_release_date:
-        d = _parse_date(s.maintainer_activity.last_release_date)
-        if d is None:
-            issues.append(f"maintainer_activity.last_release_date unparseable")
-        elif d > today:
-            issues.append("maintainer_activity.last_release_date in the future")
+        # Tolerate the string "null"/"none"/"n/a" the weak LLM sometimes
+        # writes when /releases/latest 404s — treat as legitimately absent.
+        raw = s.maintainer_activity.last_release_date.strip()
+        if raw.lower() in {"null", "none", "n/a", ""}:
+            pass
+        else:
+            d = _parse_date(raw)
+            if d is None:
+                issues.append(
+                    f"maintainer_activity.last_release_date unparseable: {raw!r}"
+                )
+            elif d > today:
+                issues.append("maintainer_activity.last_release_date in the future")
 
     # Composite score matches weighted sum within tolerance
     from ..models import compute_composite

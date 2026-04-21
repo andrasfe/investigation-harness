@@ -200,9 +200,18 @@ def _autofill_from_trace(draft: dict[str, Any], ctx: AgentContext) -> tuple[dict
         if _is_default(_get(draft, ["repo_metadata", "last_commit_date"])):
             _set(draft, ["repo_metadata", "last_commit_date"], github_repo_data.get("pushed_at", ""))
             filled.append("repo_metadata.last_commit_date")
-    if github_releases and _get(draft, ["maintainer_activity", "last_release_date"]) is None:
-        _set(draft, ["maintainer_activity", "last_release_date"], github_releases.get("published_at"))
-        filled.append("maintainer_activity.last_release_date")
+    # last_release_date: only populate if we have a real value. If the
+    # /releases/latest endpoint 404'd or published_at is missing, leave as
+    # JSON null (NOT the string "null" which the LLM sometimes writes).
+    mrel = _get(draft, ["maintainer_activity", "last_release_date"])
+    if isinstance(mrel, str) and mrel.strip().lower() in {"null", "none", ""}:
+        _set(draft, ["maintainer_activity", "last_release_date"], None)
+        filled.append("maintainer_activity.last_release_date:null_normalised")
+    if github_releases:
+        pa = github_releases.get("published_at")
+        if pa and _get(draft, ["maintainer_activity", "last_release_date"]) is None:
+            _set(draft, ["maintainer_activity", "last_release_date"], pa)
+            filled.append("maintainer_activity.last_release_date")
     if contributors_len is not None and _is_default(_get(draft, ["maintainer_activity", "distinct_committers_12mo"])):
         _set(draft, ["maintainer_activity", "distinct_committers_12mo"], contributors_len)
         filled.append("maintainer_activity.distinct_committers_12mo")
@@ -260,6 +269,24 @@ def _make_finalize(ctx: AgentContext):
         # than the scorecard's metadata block, because the Scorecard
         # dataclass schema is prohibited from accepting new fields.
         scorecard_dict, autofilled = _autofill_from_trace(scorecard_dict, ctx)
+
+        # Mechanical viability downgrade (round-7 from observed round-6 failures):
+        # if tests didn't actually run (test_count=0) OR the build didn't
+        # succeed, recommendation.viable_target MUST be false. The weak LLM
+        # over-claims viability despite the prompt rule; this is the safety net.
+        rec = scorecard_dict.setdefault("recommendation", {})
+        if rec.get("viable_target"):
+            b = scorecard_dict.get("build", {}) or {}
+            t = scorecard_dict.get("tests", {}) or {}
+            if not b.get("clean_build_succeeded") or int(t.get("test_count", 0) or 0) == 0:
+                rec["viable_target"] = False
+                rec["viability_evidence"] = []  # drop stale justification
+                n = (rec.get("notes") or "").rstrip()
+                suffix = " (auto-downgrade: cannot claim viability when build failed or tests didn't run; dry-run or broken build)"
+                if suffix not in n:
+                    rec["notes"] = (n + suffix).strip()
+                autofilled.append("recommendation.viable_target:auto_downgraded")
+
         if autofilled:
             log.info("finalize: autofilled %d field(s) from trace: %s",
                      len(autofilled), autofilled)
