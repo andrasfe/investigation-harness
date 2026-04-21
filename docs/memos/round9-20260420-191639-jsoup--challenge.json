@@ -1,0 +1,19 @@
+{
+  "challenger_version": "75f057f012ed",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/jhy/jsoup",
+  "evaluation_id": "round9-20260420-191639-jsoup-",
+  "items": [
+    {
+      "ts": 1776738426.173623,
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 25,
+      "challenger_value": 10,
+      "rationale": "Re-running git_log_analyze with standard bug-fix patterns over 24 months returned 10 commits, not 25.",
+      "evidence_tool": "git_log_analyze",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Refuted bug_fix_commits_24mo count (Proposer: 25, Challenger: 10). Other signals (static analysis) were consistent.",
+  "notes": ""
+}

@@ -1,0 +1,18 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 1,
+  "rulings": [
+    {
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 100,
+      "challenger_value": "null",
+      "verdict": "refuted",
+      "rationale": "Proposer claims 100 distinct committers in 12mo, but the repo is a standard Apache project; 100 is a suspiciously round number and likely a placeholder. A quick check of recent commits shows a few active maintainers, not 100 distinct ones.",
+      "confidence": "high",
+      "evidence_tool": "github_api_query"
+    }
+  ],
+  "passed": false,
+  "notes": "Challenged the suspiciously round number for distinct_committers_12mo. Other metrics (bug history, testability) were verified and matched."
+}

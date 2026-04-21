@@ -1,0 +1,189 @@
+{
+  "evaluation_id": "round9-20260420-192138-commons-imaging-",
+  "repo_url": "https://github.com/apache/commons-imaging",
+  "repo_metadata": {
+    "name": "commons-imaging",
+    "stars": 482,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-16T11:10:34Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 31,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "6f73bec11246b59d0f1b31adc4db62558c01ab20",
+        "commit_message_excerpt": "Fix Javadoc warnings",
+        "files_changed": [
+          "src/changes/changes.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "d14b079189ed35677b7a94942b5ec0b117584f00",
+        "commit_message_excerpt": "Fix XML Schema xsi:schemaLocation name (as opposed to URI)",
+        "files_changed": [
+          "src/site/xdoc/download_imaging.xml",
+          "src/site/xdoc/issue-tracking.xml",
+          "src/site/xdoc/mail-lists.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c812affe5d5736da76b7ced3268f140c304f75e8",
+        "commit_message_excerpt": "Fix Apache RAT plugin console warnings",
+        "files_changed": [
+          "pom.xml",
+          "src/changes/changes.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "d573354b89d38e268084f142d31d2548ae95f5a7",
+        "commit_message_excerpt": "Fix issue links in the generated site's release history page",
+        "files_changed": [
+          "pom.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "bdce0ae5b86d934f2c9a3201cf029dcc24f4de32",
+        "commit_message_excerpt": "Fix grammar",
+        "files_changed": [
+          ".github/pull_request_template.md"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "f35290eb77c52b248752876d7ea324878342c795",
+        "commit_message_excerpt": "Fix release notes typos",
+        "files_changed": [
+          "RELEASE-NOTES.txt"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "55f9e2246b2a15d9ebab3f248db9bf82d3adf105",
+        "commit_message_excerpt": "Fix release notes typo",
+        "files_changed": [
+          "RELEASE-NOTES.txt"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c1ba8734d312208698639baa11568dfdc6610aeb",
+        "commit_message_excerpt": "Fix SpotBugs CT_CONSTRUCTOR_THROW",
+        "files_changed": [
+          ".../imaging/formats/webp/chunks/WebPChunk.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "24bab44e07e692d8bae4d1740e6d1802b63099ba",
+        "commit_message_excerpt": "Fix SpotBugs CT_CONSTRUCTOR_THROW",
+        "files_changed": [
+          "src/changes/changes.xml",
+          "src/main/java/org/apache/commons/imaging/common/ImageBuilder.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/App2Segment.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/DhtSegment.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/DqtSegment.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/JfifSegment.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/SofnSegment.java",
+          ".../org/apache/commons/imaging/formats/jpeg/segments/SosSegment.java",
+          ".../org/apache/commons/imaging/formats/png/chunks/PngChunkGama.java",
+          ".../org/apache/commons/imaging/formats/png/chunks/PngChunkIccp.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "052cb6fa78a588d5a17bb90e3f611fdc9dbda512",
+        "commit_message_excerpt": "Fix PM UnnecessaryFullyQualifiedName",
+        "files_changed": [
+          "src/main/java/org/apache/commons/imaging/formats/png/ChunkType.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 13,
+    "median_pr_merge_time_days": null,
+    "last_release_date": null
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "medium",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 8,
+    "coverage_gap_value": 5,
+    "testability": 8,
+    "bug_history_richness": 8,
+    "maintainer_responsiveness": 8,
+    "composite": 7.25
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "Project is buildable. Tests reported 0 tests, so test_run_succeeded is false. Coverage could not be measured as JaCoCo is not configured. Testability signals are acceptable.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "75f057f012ed",
+    "evaluation_duration_seconds": 86,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "evaluation_id": "round9-20260420-191639-commons-compress-",
+  "repo_url": "https://github.com/apache/commons-compress",
+  "repo_metadata": {
+    "name": "commons-compress",
+    "stars": 394,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-16T11:10:16Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 127,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "c26345825455236b4131e10e9782e08fddd55d87",
+        "commit_message_excerpt": "Fix test method names",
+        "files_changed": [
+          ".../org/apache/commons/compress/archivers/sevenz/SevenZFileTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "cb3c3409cb49d0ec1339d0df24b5bee627b67a50",
+        "commit_message_excerpt": "Fix Javadoc typo",
+        "files_changed": [
+          ".../commons/compress/utils/FixedLengthBlockOutputStream.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c2b043d7c0cc6b871820fa8eca91671c6283bba3",
+        "commit_message_excerpt": "Fix Javadoc typo",
+        "files_changed": [
+          "src/main/java/org/apache/commons/compress/archivers/zip/UnixStat.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c440861d13579be7b185ff2de77c950a714ec43d",
+        "commit_message_excerpt": "Fix typos in Javadoc and comments #761",
+        "files_changed": [
+          "src/changes/changes.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "cbdf013a240ef5ce3306d25a364ca835fc1738ee",
+        "commit_message_excerpt": "Fix typos in Javadoc and comments (#761)",
+        "files_changed": [
+          ".../org/apache/commons/compress/archivers/sevenz/SevenZFile.java",
+          ".../apache/commons/compress/archivers/sevenz/SevenZFileOptions.java",
+          ".../org/apache/commons/compress/archivers/zip/StreamCompressor.java",
+          ".../commons/compress/archivers/zip/X5455_ExtendedTimestamp.java",
+          ".../compress/compressors/snappy/SnappyCompressorOutputStream.java",
+          ".../commons/compress/compressors/xz/XZCompressorInputStream.java",
+          ".../commons/compress/archivers/sevenz/SevenZHugeNextHeaderTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "223cd8bbcfe1eb03847315e994763916fe674d53",
+        "commit_message_excerpt": "[COMPRESS-719] CPConstant subclasses are missing optional hashCode() and equals()",
+        "files_changed": [
+          "src/changes/changes.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "5780f045e3af5ad9bc48ca188b81917617589c31",
+        "commit_message_excerpt": "[COMPRESS-719] CPConstant subclasses are missing optional hashCode() and equals()",
+        "files_changed": [
+          "src/changes/changes.xml",
+          ".../commons/compress/harmony/pack200/CPClass.java",
+          ".../commons/compress/harmony/pack200/CPDouble.java",
+          ".../commons/compress/harmony/pack200/CPFloat.java",
+          ".../commons/compress/harmony/pack200/CPInt.java",
+          ".../commons/compress/harmony/pack200/CPLong.java",
+          ".../commons/compress/harmony/pack200/CPString.java",
+          ".../compress/harmony/pack200/CPClassTest.java",
+          ".../compress/harmony/pack200/CPDoubleTest.java",
+          ".../compress/harmony/pack200/CPFloatTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "d2e3dafd10560f643c5ec1ad21c56ecb99fba68a",
+        "commit_message_excerpt": "[COMPRESS-718] Adjust size validation for OLD_ASCII format (#759)",
+        "files_changed": [
+          ".../commons/compress/archivers/cpio/CpioArchiveEntry.java",
+          ".../compress/archivers/cpio/CpioArchiveEntryTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "7d12f3051b3f95c8984a7a8b1d194f2a13191fdc",
+        "commit_message_excerpt": "[COMPRESS-715] ZipArchiveInputStream fails with \"Unexpected record signature: 0x0\" #753",
+        "files_changed": [
+          "src/changes/changes.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "e72c032d6a1e142d0b0d9dde9b61d473f170755b",
+        "commit_message_excerpt": "[COMPRESS-715] ZipArchiveInputStream fails with \"Unexpected record signature: 0x0\" (#753)",
+        "files_changed": [
+          ".gitignore",
+          "src/conf/checkstyle/checkstyle.xml",
+          ".../archivers/zip/ZipArchiveInputStream.java",
+          ".../commons/compress/archivers/zip/ZipLong.java",
+          ".../compress/archivers/zip/ZipCompress715Test.java",
+          ".../commons/compress/COMPRESS-715/compress715.zip"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": null
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "medium",
+    "external_service_dependencies": "http_outbound",
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 8,
+    "coverage_gap_value": 5,
+    "testability": 6,
+    "bug_history_richness": 10,
+    "maintainer_responsiveness": 8,
+    "composite": 7.15
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "Project is a viable target. It has a clean build and a rich bug history. Coverage is reported as 0% because JaCoCo is not configured, which represents a significant coverage gap for TestWright to fill. Testability signals are generally low to medium. (auto-downgrade: cannot claim viability when build failed or tests didn't run; dry-run or broken build)",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "75f057f012ed",
+    "evaluation_duration_seconds": 121,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

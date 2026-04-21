@@ -1,0 +1,27 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 2,
+  "rulings": [
+    {
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 25,
+      "challenger_value": 10,
+      "verdict": "refuted",
+      "rationale": "Re-running git_log_analyze with standard bug-fix patterns returned 10 commits, which is a 60% difference from the proposer's 25.",
+      "confidence": "high",
+      "evidence_tool": "git_log_analyze"
+    },
+    {
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 100,
+      "challenger_value": 1,
+      "verdict": "refuted",
+      "rationale": "The proposer claimed 100 distinct committers in 12 months, but the commit history shows the project is almost exclusively maintained by a single person (jhy).",
+      "confidence": "high",
+      "evidence_tool": "github_api_query"
+    }
+  ],
+  "passed": false,
+  "notes": "Refuted bug_fix_commits_24mo (25 -> 10) and distinct_committers_12mo (100 -> 1)."
+}

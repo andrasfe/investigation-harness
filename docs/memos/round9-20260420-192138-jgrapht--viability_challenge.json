@@ -1,0 +1,27 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 2,
+  "rulings": [
+    {
+      "field_path": "bug_history.bug_fix_commits_24mo",
+      "proposer_value": 4,
+      "challenger_value": 2,
+      "verdict": "refuted",
+      "rationale": "Re-running git_log_analyze with explicit bug-fix patterns over 24 months yielded only 2 commits, whereas the proposer claimed 4.",
+      "confidence": "high",
+      "evidence_tool": "git_log_analyze"
+    },
+    {
+      "field_path": "maintainer_activity.commits_last_12mo",
+      "proposer_value": 100,
+      "challenger_value": 10,
+      "verdict": "refuted",
+      "rationale": "The proposer claimed 100 commits in the last 12 months, but the commit history shows a very low frequency of non-bot activity; a sample of the most recent 100 commits is dominated by dependabot.",
+      "confidence": "medium",
+      "evidence_tool": "github_api_query"
+    }
+  ],
+  "passed": false,
+  "notes": "Disputed bug fix count and maintainer activity metrics."
+}

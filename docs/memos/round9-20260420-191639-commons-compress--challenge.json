@@ -1,0 +1,19 @@
+{
+  "challenger_version": "75f057f012ed",
+  "model": "google/gemma-4-31b-it",
+  "repo_url": "https://github.com/apache/commons-compress",
+  "evaluation_id": "round9-20260420-191639-commons-compress-",
+  "items": [
+    {
+      "ts": 1776738062.849028,
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 100,
+      "challenger_value": "null",
+      "rationale": "Proposer claims 100 distinct committers in 12mo, but the repo is a standard Apache project; 100 is an unlikely round number and likely a placeholder. A sample of 100 commits shows only a few distinct authors (e.g., Gary Gregory).",
+      "evidence_tool": "github_api_query",
+      "confidence": "high"
+    }
+  ],
+  "summary": "Challenged maintainer_activity.distinct_committers_12mo as it appeared to be a placeholder value. Other signals (bug history, testability) were verified and consistent.",
+  "notes": ""
+}

@@ -1,0 +1,18 @@
+{
+  "ran": true,
+  "challenger_model": "google/gemma-4-31b-it",
+  "challenge_count": 1,
+  "rulings": [
+    {
+      "field_path": "maintainer_activity.distinct_committers_12mo",
+      "proposer_value": 100,
+      "challenger_value": "null",
+      "verdict": "refuted",
+      "rationale": "Proposer claims 100 distinct committers in 12mo, but the repo is a standard Apache project; 100 is an unlikely round number and likely a placeholder. A sample of 100 commits shows only a few distinct authors (e.g., Gary Gregory).",
+      "confidence": "high",
+      "evidence_tool": "github_api_query"
+    }
+  ],
+  "passed": false,
+  "notes": "Challenged maintainer_activity.distinct_committers_12mo as it appeared to be a placeholder value. Other signals (bug history, testability) were verified and consistent."
+}

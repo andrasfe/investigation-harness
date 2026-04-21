@@ -80,3 +80,14 @@
 - outcome: **3/5 accepted** (JSqlParser composite 7.75, commons-imaging 6.85, jgrapht 6.3, all non-zero and differentiated). commons-compress stagnated (same as round 7). jsoup hung mid-run — LLM appears to loop silently without triggering stagnation; tracked for round 9 diagnosis.
 - net progress: first round producing **ranked candidates with meaningful composites**.
 
+
+## 2026-04-20 — round 9 — max_tokens + minimal-finalize fix → 5/5 accepted
+
+- pattern observed in round 8: commons-compress + jsoup got stuck with finalize_scorecard calls whose JSON arguments were truncated mid-string ("malformed JSON arguments — fix and retry"). Root cause: LLM output token limit was 2048, exceeded by large sampled_bug_fixes arrays.
+- edits:
+  * `scout/llm.py`: max_tokens 2048 → 4096
+  * `scout/prompts.py` Phase I: tell the student to pass a MINIMAL scorecard (no sampled_bug_fixes, no per_module_coverage, no score, no viability_evidence) — autofill enriches server-side. Cuts the finalize payload to well under 2000 tokens.
+- outcome: **5/5 ACCEPTED** with differentiated composites:
+  * JSqlParser 7.65, commons-compress 7.55, commons-imaging 7.25, jsoup 6.45, jgrapht 6.30
+- first batch where every Tier-1 repo produced a verifier-accepted scorecard.
+

@@ -1,0 +1,138 @@
+{
+  "evaluation_id": "round9-20260420-192138-jgrapht-",
+  "repo_url": "https://github.com/jgrapht/jgrapht",
+  "repo_metadata": {
+    "name": "jgrapht",
+    "stars": 2768,
+    "downloads_last_12mo": null,
+    "primary_license": "EPL-2.0",
+    "last_commit_date": "2026-04-20T09:45:50Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 0,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 0
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 4,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "a8ff9dede5edf0d185683d2333fd679c4502794d",
+        "commit_message_excerpt": "Fix some Eclipse warnings. (#1312)",
+        "files_changed": [
+          "...OrlinSharmaCyclicExchangeLocalAugmentation.java",
+          ".../jgrapht/alg/cycle/HowardMinimumMeanCycle.java",
+          ".../ColorRefinementIsomorphismInspector.java",
+          ".../java/org/jgrapht/alg/lca/NaiveLCAFinder.java",
+          ".../shortestpath/DeltaSteppingShortestPath.java",
+          ".../TransitNodeRoutingPrecomputation.java",
+          ".../alg/shortestpath/YenShortestPathIterator.java",
+          "...aOrlinSharmaCapacitatedMinimumSpanningTree.java",
+          ".../jgrapht/generate/netgen/NetworkGenerator.java",
+          ".../clustering/GreedyModularityAlgorithmTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "33242e228b042e3113c30afcbf7035a8f6915111",
+        "commit_message_excerpt": "Fix Javadoc warnings. (#1309)",
+        "files_changed": [
+          ".../src/main/java/org/jgrapht/alg/centers/GonHeuristic.java",
+          ".../java/org/jgrapht/alg/clustering/GreedyModularityAlgorithm.java",
+          ".../org/jgrapht/alg/connectivity/KConnectivityFlowAlgorithm.java",
+          ".../java/org/jgrapht/alg/tour/FarthestInsertionHeuristicTSP.java",
+          "jgrapht-core/src/main/java/org/jgrapht/graph/GraphDelegator.java",
+          "jgrapht-unimi-dsi/src/main/java/org/jgrapht/sux4j/package-info.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "9f48a59af638d44627960178837d507a6f4ccda8",
+        "commit_message_excerpt": "Fix Suurballe's modifiedWeight calculation (#1230)",
+        "files_changed": [
+          ".../SuurballeKDisjointShortestPaths.java",
+          ".../SuurballeKDisjointShortestPathsTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "f43487fa970a34df6fe44b759aef4bc6d23d63dc",
+        "commit_message_excerpt": "<fix>: resolve the unexpected behavior of DOTImporter. (#1231)",
+        "files_changed": [
+          ".../src/main/antlr4/org/jgrapht/nio/dot/DOT.g4",
+          ".../jgrapht/nio/dot/DOTEventDrivenImporter.java",
+          ".../java/org/jgrapht/nio/dot/DOTImporter2Test.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": null
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "low",
+    "external_service_dependencies": "http_outbound",
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 8,
+    "coverage_gap_value": 5,
+    "testability": 7,
+    "bug_history_richness": 3,
+    "maintainer_responsiveness": 8,
+    "composite": 6.3
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "Project lacks JaCoCo plugin, so coverage is 0. Build and tests (though test_count was 0 in dry run) succeeded. Testability signals are low.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "75f057f012ed",
+    "evaluation_duration_seconds": 64,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

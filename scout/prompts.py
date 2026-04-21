@@ -141,6 +141,24 @@ Phase H — Testability signals
   Call static_analysis(metric='all'). Use the returned buckets verbatim.
 
 Phase I — Score and finalize
+
+**IMPORTANT — keep finalize_scorecard small.** You do NOT need to send
+the sampled_bug_fixes array, per_module_coverage array, or long
+files_changed lists. The server auto-fills those from the tool trace.
+Send only:
+  - evaluation_id, repo_url (optional — server injects)
+  - repo_metadata (name, stars, primary_license, last_commit_date)
+  - build (build_system, clean_build_succeeded, clean_build_time_seconds)
+  - tests (test_count, test_pass_rate, test_run_succeeded, test_run_time_seconds)
+  - coverage (tool_used, line_coverage_percent_overall, branch_coverage_percent_overall)
+  - bug_history (bug_fix_commits_24mo ONLY — omit sampled_bug_fixes)
+  - maintainer_activity (commits_last_12mo, distinct_committers_12mo, last_release_date)
+  - testability_signals (the 5 fields)
+  - score — OMIT entirely; server derives from evidence
+  - recommendation (viable_target bool + notes string only; omit viability_evidence)
+Keeping the payload under ~1500 tokens avoids truncation. The verifier
+sees the ENRICHED scorecard produced by the server autofill, not your
+raw payload.
   Choose integer subscores 0–10 grounded in the evidence above. Set
   recommendation.viable_target = true ONLY IF all of:
     - clean_build_succeeded=true

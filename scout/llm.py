@@ -103,7 +103,7 @@ class LLMClient:
         tools: list[ToolSpec] | None = None,
         tool_choice: str | dict[str, Any] | None = None,
         temperature: float = 0.1,
-        max_tokens: int | None = 2048,
+        max_tokens: int | None = 4096,
     ) -> AssistantMessage:
         url = f"{self.base_url}/chat/completions"
         headers = {
