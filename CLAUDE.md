@@ -233,7 +233,31 @@ Teacher-side helpers:
 
 ## Observed weaknesses (update as new ones land)
 
-_Last updated: 2026-04-20, round 0 smoke test._
+_Last updated: 2026-04-21, round 13._
+
+- **`google/gemma-4-26b-a4b-it` has a broken tool-use chat template on
+  OpenRouter.** Round-13 first attempt produced 0/5 scorecards — the
+  model emitted a bare `thought` text token and halted without any
+  tool_use blocks across all five repos. Round-12 and round-13-retry
+  with `google/gemma-4-31b-it` produce 4/5 and 5/5 scorecards
+  respectively. Conclusion: the 26b-a4b variant is unusable for this
+  agent's tool-calling loop; stay on 31b-it (or move off gemma) for
+  production rounds. No scout-side fix is possible — this is a model-
+  provider issue.
+- **`runtime_deps` from pom.xml is always `unknown`.** `github_api_query`
+  returns base64-encoded `content` for `/contents/pom.xml`, and the
+  agent has no inline base64 decode. Round 13's `testability_tractable`
+  gate treats `runtime_deps=unknown` as a pass to avoid false negatives,
+  but this weakens confidence on the deps signal for every scorecard.
+  Fix needed: either a tool-spec widening on `github_api_query` to
+  return decoded content, or a new `fetch_text_file` tool. Both are
+  out-of-envelope — open an operator escalation.
+- **Rust-portability rubric calibration is load-bearing.** Rounds 12
+  (0/5 viable) and 13 (2/5 viable) show how sensitive the verdict is
+  to the exact gate thresholds. Future rubric tweaks (e.g. the 500-
+  test proxy threshold) should be paired with a before/after run on
+  the same candidate list to keep the calibration audit trail. See
+  round-12 and round-13 memos for the template.
 
 - **gemini-2.5-flash-lite under-synthesizes tool outputs.** First
   end-to-end run populated every tool call successfully but left scorecard

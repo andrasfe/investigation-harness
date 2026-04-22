@@ -1,5 +1,60 @@
 # Scout round log
 
+## 2026-04-21 — round 13 — Rust-portability rubric v2 (coverage proxy + static_state demotion)
+
+- pattern: round 12 produced **0/5 viable** candidates under the first-cut
+  Rust-portability rubric despite 4/5 scorecards being verifier-accepted.
+  Two gates were over-strict:
+  (a) `coverage_gap.satisfied` hard-failed when upstream had no JaCoCo
+      wired, conflating infrastructure-gap with low coverage.
+  (b) `testability_tractable.satisfied` hard-failed on `static_state=high`,
+      which in practice is lookup tables / const arrays (Base64 alphabets,
+      bitmap offset tables) that port cleanly to Rust `static`/`const`.
+- edit: `scout/prompts.py` only, envelope-clean, +93/-31 lines.
+  - coverage gate: satisfied iff measured ≥60% **OR** unmeasured AND
+    `test_count ≥500` AND `pass_rate ≥0.95` (high-test-count proxy).
+  - testability gate: `static_state_density` removed from the gate,
+    demoted to a −1 subscore penalty. `reflection_density=high` retained
+    as the real Java-idiomatic blocker.
+- outcome: **5/5 verifier-accepted, 2/5 viable.**
+  - commons-codec (composite 7.35) and RoaringBitmap (7.35) **flipped
+    False → True** as predicted.
+  - java-diff-utils produced a scorecard (top composite 7.75) but
+    viable=False on the 500-test proxy (only 149 tests) — dark-horse
+    pilot candidate.
+  - vavr and minimal-json remained viable=False for the right reasons
+    (reflection=high + JDK21 needed; dead project respectively).
+- model-regression finding: first round-13 attempt with
+  `google/gemma-4-26b-a4b-it` produced 0/5 scorecards — the 26b-a4b
+  variant emits a bare "thought" text token and halts without tool_use
+  blocks (broken chat template on OpenRouter). Reverted `.env` to
+  `google/gemma-4-31b-it` (round-12 working model).
+- next-round signal: pilot on commons-codec Base64 (bead `uc6` / V6
+  gate). Until a single class actually ports and Java tests pass against
+  the Rust implementation, viable=True is still a prediction.
+- memo: `docs/memos/selection-memo-round13-rust-portability.md`.
+
+## 2026-04-21 — round 12 — first Rust-portability rubric attempt (0/5 viable, calibration needed)
+
+- pattern: the user flagged that Scout had been optimising for TestWright
+  selection (coverage-gap, bug-rich) when the actual goal is Java→Rust
+  porting (zero-dep, pure algo, thorough test suite as oracle).
+- edit: prompts-only reinterpretation of the frozen scorecard schema.
+  - `score.coverage_gap_value` now rewards HIGH coverage (not gap).
+  - `score.testability` repurposed as "portability tractability".
+  - `viability_evidence[coverage_gap]` = "≥60% coverage".
+  - `viability_evidence[testability_tractable]` = "reflection=low AND
+    static_state≠high AND no external services".
+  - Added Phase B.5 dependency + size probe; new rust-portability repo
+    list (commons-codec, RoaringBitmap, java-diff-utils, vavr,
+    minimal-json) via `SCOUT_REPO_PROFILE=rust-portability`.
+- outcome: 4/5 scorecards (1× transient 429), **0/5 viable** under the
+  new rubric. Both gates fired false positives on otherwise-portable
+  repos, exposing two calibration bugs that round 13 fixed.
+- next-round signal: split `coverage_gap.satisfied` into
+  measured-and-high vs unmeasured-but-thorough; demote static_state.
+- memo: `docs/memos/selection-memo-round12-rust-portability.md`.
+
 ## 2026-04-20T12:54Z — round 1 — adversarial evaluation landed
 
 - target: JSQLParser/JSqlParser (DRY_RUN=1, no escalate, adversarial=1)
