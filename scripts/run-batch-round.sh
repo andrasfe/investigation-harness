@@ -39,16 +39,36 @@ mkdir -p docs/memos
 SUMMARY="runs/round${ROUND}-${STAMP}-summary.json"
 mkdir -p "runs/round${ROUND}-${STAMP}"
 
-echo "== round ${ROUND} batch (dry-run, ${#REPOS[@]} repos, ${ADV_ARG:-no-adversarial}) =="
+# Execution mode: dry-run by default, real docker-backed builds when
+# SCOUT_USE_DOCKER=1 is exported. Real mode bumps tool-call + time budgets
+# because mvn test can legitimately take a minute per repo.
+if [[ "${SCOUT_USE_DOCKER:-0}" =~ ^(1|true|yes|on)$ ]]; then
+  MODE_LABEL="docker-real"
+  # Ensure dry-run isn't forced on; let child inherit.
+  unset SCOUT_DRY_RUN || true
+  # Real builds need more tool calls (clone + build + tests + coverage + bug + gh +
+  # static + finalize can easily exceed 60) and more wall time.
+  export SCOUT_MAX_TOOL_CALLS="${SCOUT_MAX_TOOL_CALLS:-100}"
+  export SCOUT_TIME_BUDGET_SEC="${SCOUT_TIME_BUDGET_SEC:-3600}"
+else
+  MODE_LABEL="dry-run"
+fi
+
+echo "== round ${ROUND} batch (${MODE_LABEL}, ${#REPOS[@]} repos, ${ADV_ARG:-no-adversarial}) =="
 
 RESULTS=()
 for url in "${REPOS[@]}"; do
   slug="$(basename "${url%.git}" | tr -c 'A-Za-z0-9-' '-')"
   eid="round${ROUND}-${STAMP}-${slug}"
   run_dir="runs/${eid}"
-  echo "-- evaluating ${slug} --"
-  SCOUT_DRY_RUN=1 /usr/bin/python3 -m scout.main evaluate \
-      "$url" --evaluation-id "$eid" ${ADV_ARG} 2>&1 | tail -3 || true
+  echo "-- evaluating ${slug} (${MODE_LABEL}) --"
+  if [[ "$MODE_LABEL" == "docker-real" ]]; then
+    /usr/bin/python3 -m scout.main evaluate \
+        "$url" --evaluation-id "$eid" ${ADV_ARG} 2>&1 | tail -5 || true
+  else
+    SCOUT_DRY_RUN=1 /usr/bin/python3 -m scout.main evaluate \
+        "$url" --evaluation-id "$eid" ${ADV_ARG} 2>&1 | tail -3 || true
+  fi
 
   # Copy artifacts with round-tagged filenames.
   for f in scorecard.json verifier_report.json challenge.json viability_challenge.json evidence.json; do

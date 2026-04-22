@@ -14,10 +14,32 @@ import time
 from pathlib import Path
 from typing import Any
 
+from .. import docker_runner
 from ..agent_context import AgentContext
 from ..llm import ToolSpec
 
 log = logging.getLogger(__name__)
+
+
+def _exec(argv: list[str], *, cwd: Path, timeout: int) -> tuple[int, str, str, int, bool]:
+    """Run ``argv`` either on the host or inside the scout-builder image.
+
+    Returns ``(returncode, stdout, stderr, duration_sec, used_docker)``.
+    Raises ``subprocess.TimeoutExpired`` on host timeout for back-compat
+    with the existing caller; docker timeouts surface as returncode 124.
+    """
+    if docker_runner.is_enabled():
+        res = docker_runner.run_in_container(argv, cwd=cwd, timeout=timeout)
+        return (res.returncode, res.stdout, res.stderr, res.duration_sec, True)
+    start = time.time()
+    try:
+        res = subprocess.run(
+            argv, cwd=str(cwd), capture_output=True, text=True, timeout=timeout, check=False,
+        )
+    except subprocess.TimeoutExpired:
+        raise
+    duration = int(time.time() - start)
+    return (res.returncode, res.stdout or "", res.stderr or "", duration, False)
 
 
 def detect_build_system(checkout: Path) -> str:
@@ -35,15 +57,24 @@ def detect_build_system(checkout: Path) -> str:
 
 
 def _pick_wrapper(checkout: Path, system: str) -> tuple[list[str], bool]:
-    """Return (argv, used_wrapper). Wrapper preferred when available."""
+    """Return (argv, used_wrapper). Wrapper preferred when available.
+
+    When docker-backed execution is active we skip host ``shutil.which``
+    and assume the container's PATH has mvn/gradle — the image ships them.
+    """
+    use_docker = docker_runner.is_enabled()
     if system == "maven":
         if (checkout / "mvnw").exists():
             return ([str(checkout / "mvnw")], True)
+        if use_docker:
+            return (["mvn"], False)
         exe = shutil.which("mvn")
         return ([exe or "mvn"], False)
     if system == "gradle":
         if (checkout / "gradlew").exists():
             return ([str(checkout / "gradlew")], True)
+        if use_docker:
+            return (["gradle"], False)
         exe = shutil.which("gradle")
         return ([exe or "gradle"], False)
     return ([], False)
@@ -91,22 +122,30 @@ def _make_run_build(ctx: AgentContext):
         log_path = ctx.config.run_dir / f"build_{system}.log"
         start = time.time()
         try:
-            result = subprocess.run(
-                cmd, cwd=str(ctx.repo_checkout),
-                capture_output=True, text=True, timeout=timeout, check=False,
-            )
-            log_path.write_text(result.stdout + "\n--- stderr ---\n" + result.stderr, encoding="utf-8")
-            duration = int(time.time() - start)
-            ok = result.returncode == 0
+            rc, stdout, stderr, duration, used_docker = _exec(cmd, cwd=ctx.repo_checkout, timeout=timeout)
+            log_path.write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
+            timed_out = (rc == 124 and used_docker)
+            if timed_out:
+                ctx.errors.append(f"run_build timeout after {duration}s (docker)")
+                return {
+                    "ok": False, "timed_out": True,
+                    "build_system": system,
+                    "clean_build_time_seconds": duration,
+                    "clean_build_succeeded": False,
+                    "log_path": str(log_path),
+                    "used_docker": True,
+                    "should_escalate": True,
+                }
+            ok = rc == 0
             issues: list[str] = []
             if not ok:
-                # grab the last 10 non-blank stderr lines as issue summary
-                tail = [ln for ln in (result.stderr or "").splitlines() if ln.strip()][-10:]
+                tail = [ln for ln in (stderr or "").splitlines() if ln.strip()][-10:]
                 issues = tail
             out = {
                 "ok": ok,
                 "build_system": system,
                 "used_wrapper": used_wrapper,
+                "used_docker": used_docker,
                 "clean_build_time_seconds": duration,
                 "clean_build_succeeded": ok,
                 "log_path": str(log_path),
@@ -127,6 +166,15 @@ def _make_run_build(ctx: AgentContext):
                 "clean_build_time_seconds": duration,
                 "clean_build_succeeded": False,
                 "log_path": str(log_path),
+                "should_escalate": True,
+            }
+        except docker_runner.DockerUnavailableError as e:
+            ctx.errors.append(f"run_build docker preflight failed: {e}")
+            return {
+                "ok": False,
+                "build_system": system,
+                "clean_build_succeeded": False,
+                "error": f"docker requested but unusable: {e}",
                 "should_escalate": True,
             }
 

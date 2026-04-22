@@ -14,9 +14,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
+from .. import docker_runner
 from ..agent_context import AgentContext
 from ..llm import ToolSpec
-from .build import _pick_wrapper, detect_build_system
+from .build import _exec, _pick_wrapper, detect_build_system
 
 log = logging.getLogger(__name__)
 
@@ -149,18 +150,18 @@ def _make_run_coverage(ctx: AgentContext):
             }
 
         log_path = ctx.config.run_dir / f"coverage_{system}.log"
-        start = time.time()
         try:
-            result = subprocess.run(
-                cmd, cwd=str(ctx.repo_checkout),
-                capture_output=True, text=True, timeout=timeout, check=False,
-            )
-            log_path.write_text(result.stdout + "\n--- stderr ---\n" + result.stderr, encoding="utf-8")
+            rc, stdout, stderr, duration, used_docker = _exec(cmd, cwd=ctx.repo_checkout, timeout=timeout)
+            log_path.write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
         except subprocess.TimeoutExpired:
-            duration = int(time.time() - start)
-            ctx.errors.append(f"run_coverage timeout after {duration}s")
+            ctx.errors.append(f"run_coverage timeout (host) after {timeout}s")
             return {"ok": False, "timed_out": True, "should_escalate": True}
-        duration = int(time.time() - start)
+        except docker_runner.DockerUnavailableError as e:
+            ctx.errors.append(f"run_coverage docker preflight failed: {e}")
+            return {"ok": False, "error": f"docker requested but unusable: {e}", "should_escalate": True}
+        if rc == 124 and used_docker:
+            ctx.errors.append(f"run_coverage timeout after {duration}s (docker)")
+            return {"ok": False, "timed_out": True, "used_docker": True, "should_escalate": True}
 
         reports = _find_jacoco_reports(ctx.repo_checkout)
         if not reports:
@@ -171,7 +172,13 @@ def _make_run_coverage(ctx: AgentContext):
                 "should_escalate": True,
             }
         merged = _parse_jacoco(reports[0])
-        out = {"ok": True, "duration_sec": duration, "report_path": str(reports[0]), **merged}
+        out = {
+            "ok": True,
+            "duration_sec": duration,
+            "report_path": str(reports[0]),
+            "used_docker": used_docker,
+            **merged,
+        }
         ctx.record_evidence("coverage.tool_used", {"tool": "run_coverage", "value": "jacoco"})
         ctx.record_evidence(
             "coverage.line_coverage_percent_overall",

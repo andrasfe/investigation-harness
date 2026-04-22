@@ -246,7 +246,18 @@ _Last updated: 2026-04-20, round 0 smoke test._
 - **Dry-run mode hides real signal.** `SCOUT_DRY_RUN=1` makes every
   build/test/coverage tool return a synthetic success. Good for smoke
   testing the agent loop, useless for real scoring. Real rounds require
-  `mvn` + `gradle` locally or a container.
+  `mvn` + `gradle` locally or via docker.
+
+- **Docker-backed real builds are wired.** One-time:
+  `bash scripts/build-docker-image.sh` (pulls OpenJDK 17 + Maven 3.9 +
+  Gradle 8.10 into `scout-builder:latest`, ~1GB). Then `SCOUT_USE_DOCKER=1`
+  (and unset `SCOUT_DRY_RUN`) routes every mvn/gradle/jacoco invocation
+  through [scout/docker_runner.py](scout/docker_runner.py), which shells
+  out to `docker run --user $(id -u):$(id -g) -v <checkout>:/workspace ...`.
+  Caches persist at `~/.scout-docker-cache/{m2,gradle}`. Smoke-tested
+  on JSqlParser: `run_build` 72s cold / 36s warm, `run_tests` 4635 tests
+  100% pass, `run_coverage` correctly escalated on a real argLine/jacoco
+  conflict that dry-run had hidden.
 
 ## Workflow reminders
 

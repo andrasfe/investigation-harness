@@ -1,0 +1,4 @@
+# Nothing in the build context is used — the Dockerfile pulls everything
+# from upstream. Keep the context tiny for fast rebuilds.
+*
+!Dockerfile.builder

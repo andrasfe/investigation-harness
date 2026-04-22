@@ -79,6 +79,39 @@ ESCALATE=1 SCOUT_PARALLEL_REPOS=4 SCOUT_DRY_RUN=1 \
     bash scripts/run_batch.sh --limit 10
 ```
 
+### Real builds via Docker (no host JDK required)
+
+Scout can dispatch every `mvn` / `gradle` / `jacoco` invocation to a
+container built from [docker/Dockerfile.builder](docker/Dockerfile.builder)
+(OpenJDK 17 + Maven 3.9 + Gradle 8.10). The host stays clean.
+
+```bash
+# One-time: build the scout-builder image (~1 GB)
+bash scripts/build-docker-image.sh
+
+# Then enable docker-backed execution; disable dry-run
+export SCOUT_USE_DOCKER=1
+unset SCOUT_DRY_RUN
+
+python -m scout.main evaluate https://github.com/JSQLParser/JSqlParser
+```
+
+Behind the scenes, `run_build` / `run_tests` / `run_coverage` shell out
+to `docker run --rm --user $(id -u):$(id -g) -v <checkout>:/workspace
+-v ~/.scout-docker-cache/m2:/scout-home/.m2 ... scout-builder mvn ...`.
+Maven and Gradle caches persist across runs under
+`~/.scout-docker-cache/` so subsequent invocations are warm.
+
+Per-container limits: `SCOUT_DOCKER_MEM=4g`, `SCOUT_DOCKER_CPUS=2`,
+`SCOUT_DOCKER_NETWORK=bridge` (set `none` for fully offline builds).
+Full env reference: [`.env.example`](.env.example).
+
+Verified on JSqlParser (2026-04-20):
+- `run_build` (mvn clean compile): cold 72s, warm 36s, `clean_build_succeeded=True`
+- `run_tests` (mvn test): 4635 tests, 100% pass rate, 60s
+- `run_coverage`: legitimately escalates — jsqlparser's surefire argLine
+  doesn't chain to jacoco's javaagent. Real signal previously hidden by dry-run.
+
 ## Configuration
 
 All settings come from `.env` (loaded automatically) or shell env:
@@ -96,6 +129,12 @@ All settings come from `.env` (loaded automatically) or shell env:
 | `SCOUT_ESCALATION_BUDGET`  | `3`                                  | Teacher round-trips per repo |
 | `SCOUT_MAX_TOOL_CALLS`     | `60`                                 | Hard cap per agent run |
 | `SCOUT_DRY_RUN`            | *(unset)*                            | Skip build/test/coverage — no local mvn/gradle required |
+| `SCOUT_USE_DOCKER`         | *(unset)*                            | `1` dispatches mvn/gradle/jacoco to scout-builder container |
+| `SCOUT_BUILD_IMAGE`        | `scout-builder:latest`               | Container image for docker-backed builds |
+| `SCOUT_DOCKER_CACHE_DIR`   | `~/.scout-docker-cache`              | Host dir for persisted `.m2` / `.gradle` caches |
+| `SCOUT_DOCKER_MEM`         | `4g`                                 | Per-container memory cap |
+| `SCOUT_DOCKER_CPUS`        | `2`                                  | Per-container CPU quota |
+| `SCOUT_DOCKER_NETWORK`     | `bridge`                             | `bridge` for deps, `none` for offline |
 | `SUPERVISOR_DIR`           | per-run path                         | Teacher channel directory |
 | `ESCALATE`                 | *(unset)*                            | Opt-in to teacher round-trips |
 | `GITHUB_TOKEN`             | *(unset)*                            | Raises GitHub rate limit |
@@ -147,8 +186,9 @@ artifacts and any student code edits made between rounds.
   system). Plausibility verifier catches this (`viable_target=true`
   requires build+tests to have succeeded). Upgrading to the swarm, a
   stronger judge model, or more explicit prompt rubrics is in the backlog.
-- **mvn/gradle not bundled.** If you don't have them locally, run with
-  `SCOUT_DRY_RUN=1` and use a machine with Java tooling for real coverage numbers.
+- **mvn/gradle not required on host.** Either install them locally, or
+  run `bash scripts/build-docker-image.sh` once and set `SCOUT_USE_DOCKER=1`
+  — the scout-builder container supplies OpenJDK 17 + Maven + Gradle.
 - **Verifier Layers 4 (sampled correctness) and 5 (canary regression)**
   are in the beads backlog, not implemented yet.
 

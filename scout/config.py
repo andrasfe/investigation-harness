@@ -19,6 +19,17 @@ Scout-specific env (all optional unless noted):
     SCOUT_MAX_TOOL_CALLS    hard cap per agent run (default 60)
     SCOUT_DRY_RUN           "1" skips heavy tools (build/test/coverage) for smoke tests
     GITHUB_TOKEN            optional, raises GitHub rate limit
+
+    SCOUT_USE_DOCKER        "1" routes mvn/gradle/jacoco through a scout-builder
+                            container instead of the host (see scout/docker_runner.py).
+                            Requires `bash scripts/build-docker-image.sh` once.
+    SCOUT_BUILD_IMAGE       override the image tag (default: scout-builder:latest)
+    SCOUT_DOCKER_CACHE_DIR  host dir for persisted .m2 / .gradle caches
+                            (default: ~/.scout-docker-cache)
+    SCOUT_DOCKER_MEM        container memory cap (default: 4g)
+    SCOUT_DOCKER_CPUS       container CPU quota (default: 2)
+    SCOUT_DOCKER_NETWORK    "bridge" (default) or "none" for offline builds
+    SCOUT_DOCKER_EXTRA_ARGS shell-quoted extras forwarded to `docker run`
 """
 
 from __future__ import annotations

@@ -10,9 +10,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
+from .. import docker_runner
 from ..agent_context import AgentContext
 from ..llm import ToolSpec
-from .build import _pick_wrapper, detect_build_system
+from .build import _exec, _pick_wrapper, detect_build_system
 
 log = logging.getLogger(__name__)
 
@@ -73,24 +74,38 @@ def _make_run_tests(ctx: AgentContext):
             }
 
         log_path = ctx.config.run_dir / f"tests_{system}.log"
-        start = time.time()
         try:
-            result = subprocess.run(
-                cmd, cwd=str(ctx.repo_checkout),
-                capture_output=True, text=True, timeout=timeout, check=False,
-            )
+            rc, stdout, stderr, duration, used_docker = _exec(cmd, cwd=ctx.repo_checkout, timeout=timeout)
         except subprocess.TimeoutExpired:
-            duration = int(time.time() - start)
-            ctx.errors.append(f"run_tests timeout after {duration}s")
+            # host-side timeout (docker timeouts surface as rc=124)
+            ctx.errors.append(f"run_tests timeout (host) after {timeout}s")
+            return {
+                "ok": False, "timed_out": True,
+                "test_run_succeeded": False,
+                "test_count": 0, "test_pass_rate": 0.0,
+                "test_run_time_seconds": timeout,
+                "should_escalate": True,
+            }
+        except docker_runner.DockerUnavailableError as e:
+            ctx.errors.append(f"run_tests docker preflight failed: {e}")
+            return {
+                "ok": False,
+                "test_run_succeeded": False,
+                "test_count": 0, "test_pass_rate": 0.0,
+                "error": f"docker requested but unusable: {e}",
+                "should_escalate": True,
+            }
+        if rc == 124 and used_docker:
+            ctx.errors.append(f"run_tests timeout after {duration}s (docker)")
             return {
                 "ok": False, "timed_out": True,
                 "test_run_succeeded": False,
                 "test_count": 0, "test_pass_rate": 0.0,
                 "test_run_time_seconds": duration,
+                "used_docker": True,
                 "should_escalate": True,
             }
-        duration = int(time.time() - start)
-        log_path.write_text(result.stdout + "\n--- stderr ---\n" + result.stderr, encoding="utf-8")
+        log_path.write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
 
         totals = _parse_surefire(ctx.repo_checkout)
         total = totals["tests"]
@@ -102,13 +117,14 @@ def _make_run_tests(ctx: AgentContext):
         # so flaky detection is left to a future tool. Keep the field honest.
 
         out = {
-            "ok": result.returncode == 0 or total > 0,
-            "test_run_succeeded": result.returncode == 0,
+            "ok": rc == 0 or total > 0,
+            "test_run_succeeded": rc == 0,
             "test_count": total,
             "totals": totals,
             "test_pass_rate": round(pass_rate, 4),
             "flaky_tests_observed": flaky,
             "test_run_time_seconds": duration,
+            "used_docker": used_docker,
             "log_path": str(log_path),
             "cmd": cmd,
         }
