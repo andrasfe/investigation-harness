@@ -1,0 +1,111 @@
+{
+  "evaluation_id": "round13-20260421-185439-minimal-json-",
+  "repo_url": "https://github.com/ralfstx/minimal-json",
+  "repo_metadata": {
+    "name": "minimal-json",
+    "stars": 740,
+    "downloads_last_12mo": null,
+    "primary_license": "MIT",
+    "last_commit_date": "2023-11-15T04:37:21Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 1,
+    "clean_build_succeeded": false,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 0,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 1
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 0,
+    "sampled_bug_fixes": []
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 1,
+    "distinct_committers_12mo": 12,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2017-12-09T21:06:51Z"
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "medium",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 0,
+    "coverage_gap_value": 5,
+    "testability": 8,
+    "bug_history_richness": 0,
+    "maintainer_responsiveness": 5,
+    "composite": 3.6
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "runtime_deps=unknown, multi_module=false, est_loc=5550. Build and tests failed. Coverage unmeasured. Project is largely unmaintained.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [
+      {
+        "criterion": "build_tractable",
+        "metric": "build.clean_build_succeeded",
+        "observed_value": false,
+        "threshold": ">=90% pass rate under JDK 17",
+        "satisfied": false,
+        "rationale": "Clean build failed."
+      },
+      {
+        "criterion": "coverage_gap",
+        "metric": "tests.test_count",
+        "observed_value": 0,
+        "threshold": "\u226560% measured coverage OR \u2265500 passing tests at \u226595%",
+        "satisfied": false,
+        "rationale": "No tests ran and coverage is unmeasured."
+      },
+      {
+        "criterion": "testability_tractable",
+        "metric": "testability_signals.reflection_density",
+        "observed_value": "low",
+        "threshold": "reflection=low, thread_sleep\u22642, no external services beyond http, runtime_deps\u22645 (or unknown)",
+        "satisfied": true,
+        "rationale": "Reflection density is low, but other viability gates failed."
+      }
+    ],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "67eb4fd6a3a2",
+    "evaluation_duration_seconds": 262,
+    "escalation_count": 2,
+    "errors_encountered": []
+  }
+}

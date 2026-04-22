@@ -1,0 +1,200 @@
+{
+  "evaluation_id": "round12-20260421-182454-vavr-",
+  "repo_url": "https://github.com/vavr-io/vavr",
+  "repo_metadata": {
+    "name": "vavr",
+    "stars": 6133,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-21T04:42:44Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 28,
+    "clean_build_succeeded": false,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 0,
+    "test_pass_rate": 0,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 7
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 27,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "9bced1c05111ed63189161c52023e84f5c2c024b",
+        "commit_message_excerpt": "fix ci.yml (#3231)",
+        "files_changed": [
+          ".github/workflows/ci.yml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "ad48b2295204763561706ba6418e32e3387fcdb5",
+        "commit_message_excerpt": "fix ci.yml (#3230)",
+        "files_changed": [
+          ".github/workflows/ci.yml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "0ef0c9aee9d4031f31561577fd6bdacb0af9f4a6",
+        "commit_message_excerpt": "Fix JavaDocs typos (#3222)",
+        "files_changed": [
+          "vavr/src/main/java/io/vavr/collection/Stream.java",
+          "vavr/src/main/java/io/vavr/control/Try.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "fa9d4c9ee3f41dc44941573c2bdf2d5044000094",
+        "commit_message_excerpt": "Fix: Missing .mapTo / .mapToVoid override on Either (#3218)",
+        "files_changed": [
+          "vavr/src/main/java/io/vavr/control/Either.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "da0b6efd5ea1be68a40b5d402fca5517f049d7b1",
+        "commit_message_excerpt": "Fix Javadocs (#3202)",
+        "files_changed": [
+          "vavr/generator/Generator.scala",
+          "vavr/src-gen/main/java/io/vavr/API.java",
+          "vavr/src/main/java/io/vavr/collection/CharSeq.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "2405755ec913874582ec93fe3208dfe1e942b1c5",
+        "commit_message_excerpt": "Fix '\u2208' JavaDocs encoding (#3198)",
+        "files_changed": [
+          "vavr/generator/Generator.scala",
+          "vavr/src-gen/main/java/io/vavr/API.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "a8d4da8b2b37cd0f2788448e940c60ee3b86e494",
+        "commit_message_excerpt": "Fix '->' JavaDocs encoding (#3196)",
+        "files_changed": [
+          "vavr/generator/Generator.scala",
+          "vavr/src-gen/main/java/io/vavr/API.java",
+          ".../main/java/io/vavr/CheckedFunction0.java",
+          ".../main/java/io/vavr/CheckedFunction1.java",
+          ".../main/java/io/vavr/CheckedFunction2.java",
+          ".../main/java/io/vavr/CheckedFunction3.java",
+          ".../main/java/io/vavr/CheckedFunction4.java",
+          ".../main/java/io/vavr/CheckedFunction5.java",
+          ".../main/java/io/vavr/CheckedFunction6.java",
+          ".../main/java/io/vavr/CheckedFunction7.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "f16a2c13ef8176c27c79630aba56131352ebb42f",
+        "commit_message_excerpt": "Fix typos in comments (#3180)",
+        "files_changed": [
+          "vavr/generator/Generator.scala",
+          "vavr/src/main/java/io/vavr/collection/Traversable.java",
+          "vavr/src/main/java/io/vavr/concurrent/Task.java",
+          "vavr/src/test/java/io/vavr/AbstractValueTest.java",
+          "vavr/src/test/java/io/vavr/LazyTest.java",
+          "vavr/src/test/java/io/vavr/OutputTester.java",
+          "vavr/src/test/java/io/vavr/collection/euler/Euler34Test.java",
+          "vavr/src/test/java/io/vavr/concurrent/PromiseTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "df1f26d3453f54581dda457bad7ad7ec9f87de08",
+        "commit_message_excerpt": "Fix typo in JavaDocs (#3150)",
+        "files_changed": [
+          "vavr/generator/Generator.scala",
+          "vavr/src-gen/main/java/io/vavr/API.java",
+          "vavr/src/main/java/io/vavr/collection/Iterator.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "431cea830f7faec53b2bf3f3f47ed52b4a8eca30",
+        "commit_message_excerpt": "Fix TreeMultimap Java map conversion (#3132)",
+        "files_changed": [
+          "vavr/src/main/java/io/vavr/collection/TreeMultimap.java",
+          ".../test/java/io/vavr/collection/TreeMultimapTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2026-03-01T06:12:47Z"
+  },
+  "testability_signals": {
+    "reflection_density": "high",
+    "static_state_density": "high",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 0,
+    "coverage_gap_value": 5,
+    "testability": 3,
+    "bug_history_richness": 6,
+    "maintainer_responsiveness": 10,
+    "composite": 4.25
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "Build failed; tests failed to run; coverage unmeasured (no JaCoCo). High reflection and static state density make it a poor Rust porting target. est_loc=10050 (67 files * 150).",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "eb80e43b6d6e",
+    "evaluation_duration_seconds": 193,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

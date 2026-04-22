@@ -1,0 +1,60 @@
+{
+  "build.clean_build_succeeded": {
+    "tool": "run_build",
+    "value": true
+  },
+  "build.clean_build_time_seconds": {
+    "tool": "run_build",
+    "value": 7
+  },
+  "build.build_system": {
+    "tool": "run_build",
+    "value": "maven"
+  },
+  "tests.test_run_succeeded": {
+    "tool": "run_tests",
+    "value": true
+  },
+  "tests.test_count": {
+    "tool": "run_tests",
+    "value": 149
+  },
+  "tests.test_pass_rate": {
+    "tool": "run_tests",
+    "value": 1.0
+  },
+  "tests.test_run_time_seconds": {
+    "tool": "run_tests",
+    "value": 16
+  },
+  "bug_history.bug_fix_commits_24mo": {
+    "tool": "git_log_analyze",
+    "value": 12
+  },
+  "bug_history.sampled_bug_fixes": {
+    "tool": "git_log_analyze",
+    "sample_size": 10
+  },
+  "testability_signals.reflection_density": {
+    "tool": "static_analysis",
+    "value": "low"
+  },
+  "testability_signals.static_state_density": {
+    "tool": "static_analysis",
+    "value": "medium"
+  },
+  "testability_signals.filesystem_assumptions": {
+    "tool": "static_analysis",
+    "value": "low"
+  },
+  "testability_signals.thread_sleep_count": {
+    "tool": "static_analysis",
+    "value": 0
+  },
+  "testability_signals.external_service_dependencies": {
+    "tool": "static_analysis",
+    "value": [
+      "http_outbound"
+    ]
+  }
+}

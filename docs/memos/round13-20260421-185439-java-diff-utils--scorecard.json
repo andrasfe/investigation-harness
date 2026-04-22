@@ -1,0 +1,193 @@
+{
+  "evaluation_id": "round13-20260421-185439-java-diff-utils-",
+  "repo_url": "https://github.com/java-diff-utils/java-diff-utils",
+  "repo_metadata": {
+    "name": "java-diff-utils",
+    "stars": 1523,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-03-31T06:08:20Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 7,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": true,
+    "test_count": 149,
+    "test_pass_rate": 1,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 16
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 12,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "696edc4c1a26d3021082cf643842d534aa8e07d7",
+        "commit_message_excerpt": "feat(diffrow): add processEqualities hook and ensure equalities are processed for unchanged lines (Fixes #219) (#224)",
+        "files_changed": [
+          ".../com/github/difflib/text/DiffRowGenerator.java",
+          ".../text/DiffRowGeneratorEqualitiesTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "8b70f765919898d29568f97b7c77e9d6df93a66b",
+        "commit_message_excerpt": "Fix typo",
+        "files_changed": [
+          ".../src/main/java/com/github/difflib/algorithm/jgit/HistogramDiff.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c4b752fa51a2e6dc743d410f4706b8a89c458bb9",
+        "commit_message_excerpt": "fixes #211",
+        "files_changed": [
+          "pom.xml"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c7f4dfb1464753c530868319819f196efa19fff5",
+        "commit_message_excerpt": "fixes #208 - reformatted source code",
+        "files_changed": [
+          "java-diff-utils-jgit/pom.xml",
+          ".../difflib/algorithm/jgit/HistogramDiff.java",
+          ".../difflib/algorithm/jgit/HistogramDiffTest.java",
+          ".../algorithm/jgit/LRHistogramDiffTest.java",
+          "java-diff-utils/pom.xml",
+          ".../main/java/com/github/difflib/DiffUtils.java",
+          ".../java/com/github/difflib/UnifiedDiffUtils.java",
+          ".../java/com/github/difflib/algorithm/Change.java",
+          ".../difflib/algorithm/DiffAlgorithmFactory.java",
+          ".../github/difflib/algorithm/DiffAlgorithmI.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "de0e157a8ff43a92a8940d7c9455357a4663ec68",
+        "commit_message_excerpt": "fixes #207",
+        "files_changed": [
+          "KEYS",
+          "README.md"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "d15ecbb5683a29d94910fb3d2d08148398809346",
+        "commit_message_excerpt": "Fix typo javadoc",
+        "files_changed": [
+          ".../src/main/java/com/github/difflib/algorithm/jgit/HistogramDiff.java",
+          ".../main/java/com/github/difflib/algorithm/DiffAlgorithmListener.java",
+          "java-diff-utils/src/main/java/com/github/difflib/patch/Chunk.java",
+          "java-diff-utils/src/main/java/com/github/difflib/patch/Patch.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "c1aa689dce9fa2703292f7282e919bc0b1a9fa2d",
+        "commit_message_excerpt": "Fix a typo in DiffUtils.java javadocs",
+        "files_changed": [
+          ".../main/java/com/github/difflib/DiffUtils.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "8397e20ddcdedc40be2de7f2f7885490f59dc5a4",
+        "commit_message_excerpt": "fix: parsing unified diff chunk headers (#198)",
+        "files_changed": [
+          "java-diff-utils/src/main/java/com/github/difflib/UnifiedDiffUtils.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "110a0da37bf02aced82dab720ea57982dd42c458",
+        "commit_message_excerpt": "fixes #191 - downgraded patch to Java 8 compliance",
+        "files_changed": [
+          ".../src/test/java/com/github/difflib/text/DiffRowGeneratorTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "803fc4a18838a7d02a26ff916688fb0aa85391ad",
+        "commit_message_excerpt": "fixes #191 - downgraded patch to Java 8 compliance",
+        "files_changed": [
+          ".../src/main/java/com/github/difflib/text/DiffRowGenerator.java",
+          ".../main/java/com/github/difflib/text/deltamerge/DeltaMergeUtils.java",
+          ".../src/test/java/com/github/difflib/text/DiffRowGeneratorTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": "2024-11-23T22:05:28Z"
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "medium",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 10,
+    "coverage_gap_value": 5,
+    "testability": 8,
+    "bug_history_richness": 6,
+    "maintainer_responsiveness": 10,
+    "composite": 7.75
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "runtime_deps=unknown, multi_module=true, est_loc=4950, coverage_unmeasured. The project is a pure algorithm library for diffing, making it an excellent Rust porting candidate.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "67eb4fd6a3a2",
+    "evaluation_duration_seconds": 117,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}

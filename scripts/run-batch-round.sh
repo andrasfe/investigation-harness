@@ -27,13 +27,30 @@ for a in "$@"; do
 done
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
-REPOS=(
-  "https://github.com/JSQLParser/JSqlParser"
-  "https://github.com/apache/commons-compress"
-  "https://github.com/apache/commons-imaging"
-  "https://github.com/jgrapht/jgrapht"
-  "https://github.com/jhy/jsoup"
-)
+
+# Repo list. Default: Tier-1 (TestWright-era list).
+# Set SCOUT_REPO_PROFILE=rust-portability for the round-12+ list focused on
+# small, low-dependency, pure-algorithm Java libraries suitable for Rust porting.
+# Set SCOUT_REPOS_LIST to a colon-separated override for ad-hoc runs.
+if [[ -n "${SCOUT_REPOS_LIST:-}" ]]; then
+  IFS=':' read -r -a REPOS <<< "${SCOUT_REPOS_LIST}"
+elif [[ "${SCOUT_REPO_PROFILE:-tier1}" == "rust-portability" ]]; then
+  REPOS=(
+    "https://github.com/RoaringBitmap/RoaringBitmap"
+    "https://github.com/apache/commons-codec"
+    "https://github.com/java-diff-utils/java-diff-utils"
+    "https://github.com/vavr-io/vavr"
+    "https://github.com/ralfstx/minimal-json"
+  )
+else
+  REPOS=(
+    "https://github.com/JSQLParser/JSqlParser"
+    "https://github.com/apache/commons-compress"
+    "https://github.com/apache/commons-imaging"
+    "https://github.com/jgrapht/jgrapht"
+    "https://github.com/jhy/jsoup"
+  )
+fi
 
 mkdir -p docs/memos
 SUMMARY="runs/round${ROUND}-${STAMP}-summary.json"

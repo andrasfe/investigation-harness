@@ -1,0 +1,212 @@
+{
+  "evaluation_id": "round12-20260421-182454-commons-codec-",
+  "repo_url": "https://github.com/apache/commons-codec",
+  "repo_metadata": {
+    "name": "commons-codec",
+    "stars": 482,
+    "downloads_last_12mo": null,
+    "primary_license": "Apache-2.0",
+    "last_commit_date": "2026-04-19T11:12:19Z"
+  },
+  "build": {
+    "build_system": "maven",
+    "jdk_version_required": "",
+    "clean_build_time_seconds": 3,
+    "clean_build_succeeded": true,
+    "build_log_path": "",
+    "build_issues_encountered": []
+  },
+  "tests": {
+    "test_run_succeeded": false,
+    "test_count": 18837,
+    "test_pass_rate": 0.9999,
+    "flaky_tests_observed": [],
+    "test_run_time_seconds": 16
+  },
+  "coverage": {
+    "tool_used": "other",
+    "line_coverage_percent_overall": 0.0,
+    "branch_coverage_percent_overall": 0.0,
+    "per_module_coverage": []
+  },
+  "bug_history": {
+    "closed_bug_issues_24mo": 0,
+    "bug_fix_commits_24mo": 57,
+    "sampled_bug_fixes": [
+      {
+        "commit_sha": "054a4dd0fae429a655e34997bc38d8dddfcada15",
+        "commit_message_excerpt": "Fix Javadoc text",
+        "files_changed": [
+          "src/main/java/org/apache/commons/codec/digest/DigestUtils.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "9e8cb6acd1cd7f6aa3362be8e088ebc5c130faff",
+        "commit_message_excerpt": "Small fixes to `GitIdentifiers` (#429)",
+        "files_changed": [
+          ".../commons/codec/digest/GitIdentifiers.java",
+          ".../commons/codec/digest/GitIdentifiersTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "0e98b77748630e809cd7e659616df24094278912",
+        "commit_message_excerpt": "Fix Javadoc typo",
+        "files_changed": [
+          "src/main/java/org/apache/commons/codec/digest/GitIdentifiers.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "74bdc007b300dc8b06cb579517096d497540448d",
+        "commit_message_excerpt": "Fix spelling (codespell)",
+        "files_changed": [
+          ".../java/org/apache/commons/codec/binary/BaseNCodecInputStream.java",
+          "src/main/java/org/apache/commons/codec/digest/HmacUtils.java",
+          "src/main/java/org/apache/commons/codec/digest/PureJavaCrc32.java",
+          "src/test/java/org/apache/commons/codec/digest/Md5CryptTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "850d2bb7e6a4626765c44982645e24828e24abb5",
+        "commit_message_excerpt": "Fix Base58 zero buffer bug",
+        "files_changed": [
+          ".../org/apache/commons/codec/binary/Base58.java",
+          ".../codec/binary/Base58OutputStreamTest.java",
+          ".../apache/commons/codec/binary/Base58Test.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "33831c5c47477e90dbc731ac3e13671170042dcd",
+        "commit_message_excerpt": "Fix generic compiler warning",
+        "files_changed": [
+          ".../org/apache/commons/codec/binary/BaseNCodecOutputStreamTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "3a65a4a974f420798f5aec507988cb61bfb1d82d",
+        "commit_message_excerpt": "fix: add support for symlinks in `DigestUtils.gitBlob()`",
+        "files_changed": [
+          ".../org/apache/commons/codec/digest/DigestUtils.java",
+          ".../apache/commons/codec/digest/DigestUtilsTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "ca52f570255b2e1f4fd6faeb198799169870fb6d",
+        "commit_message_excerpt": "[CODEC-336] Base64.Builder.setUrlSafe() Javadoc incorrectly states null is accepted for primitive boolean parameter",
+        "files_changed": [
+          "src/changes/changes.xml",
+          "src/main/java/org/apache/commons/codec/binary/Base64.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "f55056104a73b19f978a67cebdffaac1f7320b6c",
+        "commit_message_excerpt": "[CODEC-334] Add tests in Base64OutputStreamTest",
+        "files_changed": [
+          ".../codec/binary/Base64OutputStreamTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      },
+      {
+        "commit_sha": "2cdfac1a8e34ffba32603d97d81173158b16ba04",
+        "commit_message_excerpt": "[CODEC-317] ColognePhonetic can create duplicate consecutive codes in some cases.",
+        "files_changed": [
+          "src/changes/changes.xml",
+          ".../commons/codec/language/ColognePhonetic.java",
+          ".../codec/language/ColognePhoneticTest.java"
+        ],
+        "plausibly_test_catchable": true,
+        "rationale": "auto-extracted from git_log_analyze"
+      }
+    ]
+  },
+  "maintainer_activity": {
+    "commits_last_12mo": 100,
+    "distinct_committers_12mo": 100,
+    "median_pr_merge_time_days": null,
+    "last_release_date": null
+  },
+  "testability_signals": {
+    "reflection_density": "low",
+    "static_state_density": "high",
+    "external_service_dependencies": [
+      "http_outbound"
+    ],
+    "thread_sleep_count": 0,
+    "filesystem_assumptions": "low"
+  },
+  "score": {
+    "build_tractability": 10,
+    "coverage_gap_value": 5,
+    "testability": 6,
+    "bug_history_richness": 8,
+    "maintainer_responsiveness": 8,
+    "composite": 7.35
+  },
+  "recommendation": {
+    "viable_target": false,
+    "recommended_submodule": null,
+    "notes": "runtime_deps=unknown, multi_module=false, est_loc=13050. Coverage unmeasured due to missing JaCoCo plugin. High static state density.",
+    "estimated_coverage_delta_achievable": null,
+    "viability_evidence": [
+      {
+        "criterion": "build_tractable",
+        "metric": "build.clean_build_succeeded",
+        "observed_value": true,
+        "threshold": ">=90% pass rate",
+        "satisfied": true,
+        "rationale": "Build and tests passed (with 1 failure in 18k tests)."
+      },
+      {
+        "criterion": "coverage_gap",
+        "metric": "coverage.line_coverage_percent_overall",
+        "observed_value": 0,
+        "threshold": ">=60% to validate Rust port",
+        "satisfied": false,
+        "rationale": "Coverage could not be measured; no oracle for Rust port validation."
+      },
+      {
+        "criterion": "testability_tractable",
+        "metric": "testability_signals.static_state_density",
+        "observed_value": "high",
+        "threshold": "reflection=low, static_state!=high, runtime_deps<=5, no external services beyond http",
+        "satisfied": false,
+        "rationale": "High static state density makes porting to Rust more complex."
+      }
+    ],
+    "pilot_result": {
+      "ran": false,
+      "target_class": "",
+      "target_module": "",
+      "agent": "",
+      "pilot_compiled": false,
+      "pilot_passed": false,
+      "pilot_coverage_delta_percent": 0.0,
+      "pilot_turns": 0,
+      "pilot_cost_usd": 0.0,
+      "pilot_escalations": 0,
+      "notes": ""
+    }
+  },
+  "metadata": {
+    "student_version": "eb80e43b6d6e",
+    "evaluation_duration_seconds": 111,
+    "escalation_count": 1,
+    "errors_encountered": []
+  }
+}
