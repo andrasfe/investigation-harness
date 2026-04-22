@@ -1,6 +1,6 @@
 # Scout — capability distillation trajectory
 
-_Generated 2026-04-21T04:14:19Z_
+_Generated 2026-04-22T00:33:06Z_
 
 This file is the paper-grade artifact for SPEC §10 success criterion 5: 
 evidence that the student gets better with each round.
@@ -19,11 +19,12 @@ evidence that the student gets better with each round.
 | round-8 | 3 | 3 | 100% | 1 | 0 |
 | round-9 | 14 | 12 | 86% | 12 | 0 |
 | round-10 | 5 | 5 | 100% | 3 | 0 |
+| round-11 | 5 | 5 | 100% | 0 | 0 |
 
 ### Trends
 
-- verifier pass-rate:     `▁ ███▂██▇█`
-- adversarial refutations: `▂▁▂▂▁▃▃▂█▃`  (should trend **down** if the student is learning)
+- verifier pass-rate:     `▁ ███▂██▇██`
+- adversarial refutations: `▂▁▂▂▁▃▃▂█▃▁`  (should trend **down** if the student is learning)
 
 ### Top rejection reasons per round
 **round-1**
